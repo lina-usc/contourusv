@@ -51,9 +51,9 @@ root_path/                  # Passed via --root_path argument
 │   └── TRIAL_NAME/         # Passed via --trial argument
 │       ├── *.wav           # Audio recordings
 │       ├── *.WAV           # (Alternative capitalization)
-│       ├── *.html          # DeepSqueak annotations
-│       ├── *.xlsx          # Excel manual annotations
-│       └── *.csv           # Simple timestamp annotations
+│       ├── *.html          # HTML annotations
+│       ├── *.xlsx          # Excel annotations
+│       └── *.csv           # CSV annotations
 ```
 
 **Example Concrete Structure:**
@@ -71,9 +71,9 @@ root_path/                  # Passed via --root_path argument
 - Audio files: Must have `.wav` or `.WAV` extension
 - Annotation files: Must match audio filenames and reside in same directory
 - Supported annotation formats:
-  - HTML (DeepSqueak output)
-  - Excel (.xlsx with specific column headers)
-  - CSV (simple begin/end time format)
+  - HTML
+  - Excel
+  - CSV
 
 ## Output Structure
 
@@ -138,9 +138,9 @@ python main.py \
 
 3. **Annotation Generation**
    - Supports multiple input formats:
-     - HTML (DeepSqueak output)
-     - Excel (Manual annotations)
-     - CSV (Simple timestamp format)
+     - HTML
+     - Excel
+     - CSV
 
 4. **Evaluation**
    - Precision/Recall calculations
