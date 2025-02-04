@@ -64,7 +64,7 @@ root_path/                  # Passed via --root_path argument
         ├── rat12_day1.wav
         ├── rat12_day1.html
         ├── rat13_day1.WAV
-        └── rat13_day1.xlsx
+        └── rat13_day1.html
 ```
 
 **File Requirements:**
@@ -93,6 +93,8 @@ output/
 
 ## Usage
 
+In the `src` directory execute the following command to run the detection pipeline.
+
 ### Basic Command
 ```bash
 python main.py \
@@ -100,6 +102,15 @@ python main.py \
   --experiment EXPERIMENT_NAME \
   --trial TRIAL_NAME \
   --file_ext ANNOTATION_FILE_EXT
+```
+
+### Example Command
+```bash
+python main.py \
+  --root_path /Users/username/data \
+  --experiment PTSD16 \
+  --trial ACQ \
+  --file_ext .html
 ```
 
 ### Required Arguments
