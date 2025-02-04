@@ -3,9 +3,9 @@
 ![Python Version](https://img.shields.io/badge/python-%3E%3D3.9-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-ContourUSV is an automated pipeline for detecting ultrasonic vocalizations (USVs) in audio recordings. The system uses spectrogram analysis combined with advanced image processing techniques to identify and classify 22kHz and 50kHz USVs commonly observed in rodent studies.
+ContourUSV is an automated pipeline for detecting ultrasonic vocalizations (USVs) in audio recordings. The system uses spectrogram analysis combined with advanced image processing techniques to identify and classify 22kHz and 50kHz USVs.
 
-## Features
+<!-- ## Features
 
 - Audio preprocessing with bandpass filtering and normalization
 - Spectrogram generation with customizable parameters
@@ -19,7 +19,7 @@ ContourUSV is an automated pipeline for detecting ultrasonic vocalizations (USVs
 - Comprehensive evaluation metrics:
   - Precision, Recall, F1 Score, Specificity
   - Carbon emissions tracking via CodeCarbon
-- Parallel processing support
+- Parallel processing support -->
 
 ## Installation
 
@@ -120,7 +120,7 @@ python main.py \
 | `--wsize`      | 2500    | Window size for processing               |
 | `--th_perc`    | 95      | Percentile threshold for noise reduction |
 
-## Pipeline Architecture
+<!-- ## Pipeline Architecture
 
 1. **Preprocessing**
    - Audio normalization and filtering
@@ -176,7 +176,7 @@ Sample output:
 ContourUSV_Execution_Time_(s) = 452.783
 ContourUSV_Carbon_Emissions_(kgCO2) = 0.127
 ContourUSV_Total_Energy_Consumed_(kWh) = 0.342
-```
+``` -->
 
 ## Contributing
 
