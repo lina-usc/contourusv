@@ -1,18 +1,33 @@
-import mne
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.io import wavfile
-from scipy.signal import butter, filtfilt
-import pandas as pd
-from pathlib import Path
-import time
 import cv2
-from scipy import ndimage
-from PIL import Image as im
-import seaborn as sns
 
 def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, file_name, annotations):
+    """
+    Detect and classify USVs in cleaned spectrogram images.
 
+    Parameters
+    ----------
+    cleaned_image : ndarray
+        Preprocessed spectrogram image (2D array)
+    start_time : float
+        Start time of current processing window (seconds)
+    end_time : float
+        End time of current processing window (seconds)
+    freq_min : float
+        Minimum frequency bound for detection (kHz)
+    freq_max : float
+        Maximum frequency bound for detection (kHz)
+    file_name : Path
+        Source audio file path
+    annotations : list
+        List to accumulate detection annotations
+
+    Returns
+    -------
+    tuple
+        (annotated_image, updated_annotations)
+        annotated_image: RGB image with detection bounding boxes
+        updated_annotations: List of annotation dictionaries
+    """
     # Re-apply Otsu's Thresholding
     ret, thresholded_image = cv2.threshold(
         cleaned_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -83,7 +98,7 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, fil
                     'duration': duration,
                     'USV_TYPE': '50khz'
                 })
-    # Annotate the image with the updated labeling function
+    # Annotate the image with the bounding boxes
     image_with_annotations = cv2.cvtColor(
         thresholded_image, cv2.COLOR_GRAY2BGR)
     for usv in usv_details:

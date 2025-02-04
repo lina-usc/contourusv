@@ -1,10 +1,21 @@
 import pandas as pd
 from pathlib import Path
-import time
-import argparse
-
 
 def load_html_usv(file_name):
+    """
+    Load USV annotations from DeepSqueak HTML file.
+
+    Parameters
+    ----------
+    file_name : Path
+        Path to DeepSqueak HTML annotation file
+
+    Returns
+    -------
+    DataFrame
+        Processed annotations with columns:
+        ['begin_time', 'end_time', 'usv_type']
+    """
     metadata, data = pd.read_html(file_name)
     for df in [metadata, data]:
         df.rename(columns=df.iloc[0], inplace=True)
@@ -23,6 +34,20 @@ def load_html_usv(file_name):
 
 
 def load_excel_usv(file_name):
+    """
+    Load USV annotations from Excel file.
+
+    Parameters
+    ----------
+    file_name : Path
+        Path to Excel annotation file (.xlsx)
+
+    Returns
+    -------
+    DataFrame
+        Processed annotations with columns:
+        ['begin_time', 'end_time', 'low_freq', 'high_freq', 'usv_type']
+    """
     data = pd.read_excel(file_name, engine='openpyxl')
     num_columns = {
         'Begin Time (s)': 'begin_time',
@@ -38,6 +63,20 @@ def load_excel_usv(file_name):
 
 
 def load_csv_usv(file_name):
+    """
+    Load simple timestamp annotations from CSV file.
+
+    Parameters
+    ----------
+    file_name : Path
+        Path to CSV annotation file
+
+    Returns
+    -------
+    DataFrame
+        Processed annotations with columns:
+        ['begin_time', 'end_time']
+    """
     data = pd.read_csv(file_name, header=None, names=['begin_time', 'end_time'], usecols=[0, 1])
     data['begin_time'] = data['begin_time'].astype(float)
     data['end_time'] = data['end_time'].astype(float)
@@ -46,6 +85,24 @@ def load_csv_usv(file_name):
 
 def save_annotations(files, audio_file_name, output_path, file_ext,
                      freq_min=18000, freq_max=30000):
+    """
+    Convert annotation files to standardized format and save.
+
+    Parameters
+    ----------
+    files : list
+        List of annotation file paths
+    audio_file_name : Path
+        Corresponding audio file path
+    output_path : Path
+        Directory to save processed annotations
+    file_ext : str
+        Annotation file type (.html, .xlsx, .csv)
+    freq_min : int, optional
+        Default minimum frequency (Hz) for CSV/HTML (default: 18000)
+    freq_max : int, optional
+        Default maximum frequency (Hz) for CSV/HTML (default: 30000)
+    """
     annotations = []
     for f in files:
         if file_ext == '.html':
@@ -92,6 +149,25 @@ def save_annotations(files, audio_file_name, output_path, file_ext,
 
 
 def generate_annotations(experiment, trial, root_path, file_ext):
+    """
+    Generate ground truth annotations for all audio files in experiment.
+
+    Parameters
+    ----------
+    experiment : str
+        Experiment name
+    trial : str
+        Trial/condition name
+    root_path : Path
+        Root data directory
+    file_ext : str
+        Annotation file extension (.html, .xlsx, .csv)
+
+    Raises
+    ------
+    ValueError
+        If invalid file extension is provided
+    """
     print(f"Processing {experiment} {trial} experiment...")
     files_path = Path(root_path) / experiment / trial
     output_path = Path(f'{root_path}/{experiment}/{trial}/ground_truth_annotations')
@@ -109,7 +185,7 @@ def generate_annotations(experiment, trial, root_path, file_ext):
     audio_files = sorted(list(files_path.rglob("*.wav")) + list(files_path.rglob("*.WAV")))
 
     for audio_file in audio_files:
-        # Match files by some naming convention (adjust as needed)
+        # Match files
         stem_parts = audio_file.stem.split('_')[0:3]
 
         if file_ext == '.html':

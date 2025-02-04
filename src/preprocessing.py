@@ -1,18 +1,28 @@
-import mne
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.io import wavfile
-from scipy.signal import butter, filtfilt
-import pandas as pd
-from pathlib import Path
-import time
 import cv2
+import numpy as np
 from scipy import ndimage
-from PIL import Image as im
-import seaborn as sns
 
 def clean_spec(Sxx):
+    """
+    Preprocess spectrogram data for USV detection.
 
+    Processing steps:
+    1. Median filtering
+    2. Normalization (0-255)
+    3. Otsu's thresholding
+    4. CLAHE contrast enhancement
+    5. Morphological closing
+
+    Parameters
+    ----------
+    Sxx : ndarray
+        Input spectrogram (2D array in dB scale)
+
+    Returns
+    -------
+    ndarray
+        Preprocessed binary image (2D uint8 array)
+    """
     # Apply median filter
     filtered_data = ndimage.median_filter(Sxx, 3)
 
