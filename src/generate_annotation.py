@@ -170,7 +170,7 @@ def generate_annotations(experiment, trial, root_path, file_ext):
     """
     print(f"Processing {experiment} {trial} experiment...")
     files_path = Path(root_path) / experiment / trial
-    output_path = Path(f'{root_path}/{experiment}/{trial}/ground_truth_annotations')
+    output_path = Path(f'{root_path}/output/{experiment}/{trial}/ground_truth_annotations')
     output_path.mkdir(parents=True, exist_ok=True)
 
     if file_ext == '.html':
