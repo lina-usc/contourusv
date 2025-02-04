@@ -151,7 +151,7 @@ def run_evaluation(experiment, trial, root_path):
     predicted_files = sorted(
         list(Path(f'{root_path}/output/{experiment}/{trial}/contour_detections').rglob("*.csv")))
     annotation_files = sorted(
-        list(Path(f'{root_path}/{experiment}/{trial}/ground_truth_annotations').rglob("*.csv")))
+        list(Path(f'{root_path}/output/{experiment}/{trial}/ground_truth_annotations').rglob("*.csv")))
 
     # Check for matching files and process them
     for audio_file in audio_files:
