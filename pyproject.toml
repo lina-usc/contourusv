@@ -14,14 +14,15 @@ readme = "README.md"
 requires-python = ">=3.9"
 
 # List all required runtime dependencies here
-[project.dependencies]
-numpy = "*"
-mne = "*"
-matplotlib = "*"
-scipy = "*"
-pandas = "*"
-opencv-python = "*"
-tqdm = "*"
-codecarbon = "*"
-seaborn = "*"
-pillow = "*"
+dependencies = [
+  "numpy",
+  "mne",
+  "matplotlib",
+  "scipy",
+  "pandas",
+  "opencv-python",
+  "tqdm",
+  "codecarbon",
+  "seaborn",
+  "pillow"
+]
