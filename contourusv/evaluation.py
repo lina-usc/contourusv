@@ -1,13 +1,8 @@
 import numpy as np
 import pandas as pd
-from scipy.io import wavfile
-import matplotlib.pyplot as plt
-import seaborn as sns
 from tqdm import tqdm
 from pathlib import Path
-import argparse
-import time
-
+from scipy.io import wavfile
 
 def has_columns(file_path, delimiter=','):
     with open(file_path, 'r') as f:
@@ -27,6 +22,26 @@ def load_annotation(predicted_labels, actual_labels):
 
 
 def evaluate_predictions(filename, sample_labels, predicted_sample_labels, total_samples):
+    """
+    Calculate evaluation metrics for USV predictions.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the audio file being evaluated
+    sample_labels : ndarray
+        Ground truth binary labels (1=USV present)
+    predicted_sample_labels : ndarray
+        Predicted binary labels (1=USV detected)
+    total_samples : int
+        Total number of samples in audio file
+
+    Returns
+    -------
+    dict
+        Evaluation metrics dictionary with keys:
+        ['Filename', 'TP', 'FP', 'TN', 'FN', 'Precision', 'Recall', 'F1 Score', 'Specificity']
+    """
     # Calculate TP, FP, TN, FN
     tp = np.sum((sample_labels == 1) & (predicted_sample_labels == 1))
     fp = np.sum((sample_labels == 0) & (predicted_sample_labels == 1))
@@ -52,6 +67,26 @@ def evaluate_predictions(filename, sample_labels, predicted_sample_labels, total
 
 
 def get_sample_labels(audio_file, actual_labels, predicted_labels):
+    """
+    Convert time-based annotations to sample-wise binary labels.
+
+    Parameters
+    ----------
+    audio_file : Path
+        Path to audio file
+    actual_labels : DataFrame
+        Ground truth annotations
+    predicted_labels : DataFrame
+        Detected USV annotations
+
+    Returns
+    -------
+    tuple
+        (sample_labels, predicted_sample_labels, total_samples)
+        sample_labels: Ground truth binary array
+        predicted_sample_labels: Detection binary array
+        total_samples: Length of audio file in samples
+    """
     # Load the WAV file
     sampling_rate, data = wavfile.read(audio_file)
     # Get the total number of samples
@@ -62,7 +97,7 @@ def get_sample_labels(audio_file, actual_labels, predicted_labels):
     # Initialize all predicted samples as 0 and convert to NumPy array
     predicted_sample_labels = np.zeros(total_samples)
 
-    # Example label windows in seconds
+    # Label windows in seconds
     label_windows = [
         {'begin_time': row['begin_time'], 'end_time': row['end_time']}
         for _, row in actual_labels.iterrows()
@@ -90,6 +125,23 @@ def get_sample_labels(audio_file, actual_labels, predicted_labels):
 
 
 def run_evaluation(experiment, trial, root_path):
+    """
+    Run full evaluation pipeline for an experiment.
+
+    Parameters
+    ----------
+    experiment : str
+        Experiment name
+    trial : str
+        Trial/condition name
+    root_path : Path
+        Root data directory
+
+    Outputs
+    -------
+    Saves evaluation results CSV to:
+    {root_path}/output/{experiment}/{trial}/evaluation_results/
+    """
     print(f"Evaluating {experiment} {trial} experiment...")
     evaluation_results = []
     durations = []

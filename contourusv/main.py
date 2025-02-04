@@ -1,25 +1,39 @@
-import mne
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.io import wavfile
-from scipy.signal import spectrogram, butter, filtfilt
-import pandas as pd
-from pathlib import Path
 import time
-import cv2
-from scipy import ndimage
-from PIL import Image as im
-import seaborn as sns
 import argparse
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
+from pathlib import Path
+from scipy.io import wavfile
+import matplotlib.pyplot as plt
 from codecarbon import EmissionsTracker
+from scipy.signal import spectrogram, butter, filtfilt
 
 from preprocessing import clean_spec
-from detection import detect_contours
 from evaluation import run_evaluation
+from detection import detect_contours
 from generate_annotation import generate_annotations
 
 def low_pass_filter(data, cutoff, fs, order=5):
+    """
+    Apply a Butterworth low-pass filter to input data.
+
+    Parameters
+    ----------
+    data : ndarray
+        Input signal to be filtered
+    cutoff : float
+        Cutoff frequency in Hz
+    fs : float
+        Sampling frequency in Hz
+    order : int, optional
+        Filter order (default: 5)
+
+    Returns
+    -------
+    ndarray
+        Filtered output signal
+    """
     nyquist = 0.5 * fs
     normal_cutoff = cutoff / nyquist
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
@@ -28,6 +42,39 @@ def low_pass_filter(data, cutoff, fs, order=5):
 
 
 def run_detection(root_path, file_name, experiment, trial, overlap=3, winlen=10, freq_min=15, freq_max=115, wsize=2500, th_perc=95):
+    """
+    Process audio file to detect ultrasonic vocalizations (USVs).
+
+    Parameters
+    ----------
+    root_path : Path
+        Root directory for input/output data
+    file_name : Path
+        Path to audio file to process
+    experiment : str
+        Name of the experiment
+    trial : str
+        Name of the trial/condition
+    overlap : int, optional
+        Overlap between processing windows in seconds (default: 3)
+    winlen : int, optional
+        Window length for processing in seconds (default: 10)
+    freq_min : int, optional
+        Minimum frequency for USV detection in kHz (default: 15)
+    freq_max : int, optional
+        Maximum frequency for USV detection in kHz (default: 115)
+    wsize : int, optional
+        Spectrogram window size (default: 2500)
+    th_perc : float, optional
+        Percentile threshold for noise reduction (default: 95)
+
+    Returns
+    -------
+    None
+        Outputs:
+        - Annotated spectrogram images in {root_path}/output/spectrograms/
+        - Detection annotations in {root_path}/output/contour_detections/
+    """
     sfreq, data = wavfile.read(file_name)
     print(f"Processing {file_name.stem}... Sampling Frequency: {sfreq} Hz...")
 
@@ -73,11 +120,6 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3, winlen=10,
         # Convert frequencies to kHz
         f = f / 1000
 
-        # Select the desired frequency range (from freq_min to freq_max)
-        # freq_mask = (f >= freq_min) & (f <= freq_max)
-        # f = f[freq_mask]
-        # Sxx = Sxx[freq_mask, :]
-
         # Noise reduction: apply a decibel threshold
         noise_floor = np.percentile(Sxx, th_perc)
         Sxx[Sxx < noise_floor] = noise_floor
@@ -89,6 +131,8 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3, winlen=10,
             f'{root_path}/output/{experiment}/{trial}/spectrograms/{file_name.stem}')
         # Ensure output directory exists
         Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+        # Visualize the spectrograms
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.imshow(final_image, aspect='auto', extent=[
             start_time, end_time, 0, 120], origin='lower')
@@ -115,6 +159,19 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3, winlen=10,
     print(f'Saved annotations to {output_annotation_file}')
 
 if __name__ == "__main__":
+    """
+    USV Detection Pipeline main entry point.
+
+    Processes audio files to detect ultrasonic vocalizations, generates ground truth
+    annotations, runs evaluation metrics, and tracks computational resources.
+
+    Command Line Arguments:
+    --root_path : Root directory containing experiment data
+    --experiment : Name of the experiment (e.g., PTSD16)
+    --trial : Trial/condition name (e.g., ACQ)
+    --file_ext : Annotation file extension (.html, .xlsx, .csv)
+    [Other arguments...]
+    """
     parser = argparse.ArgumentParser(description="USV Detection Pipeline")
     parser.add_argument("--root_path", type=str, default="/Users/username/data",
                         help="Root path to the experiment data", required=True)
@@ -152,7 +209,7 @@ if __name__ == "__main__":
     audio_files = sorted(list(files_path.rglob(
         "*.wav")) + list(files_path.rglob("*.WAV")))
 
-    # Measure the time taken to process the experiment
+    # Measure the time and energy taken to execute the pipeline
     start_time = time.time()
     tracker = EmissionsTracker(output_dir=output_path)
     tracker.start()
@@ -161,7 +218,7 @@ if __name__ == "__main__":
     for audio_file in tqdm(audio_files, desc=f"Running Detection on audio files for {experiment} {trial}"):
         run_detection(root_path, audio_file, experiment, trial, **ac_kwargs)
     
-    # Generate annotations
+    # Generate ground truth annotations
     generate_annotations(experiment, trial, root_path, file_ext)
 
     # Run evaluation
