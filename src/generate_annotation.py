@@ -104,8 +104,8 @@ def save_annotations(files, audio_file_name, output_path, file_ext,
         Default maximum frequency (Hz) for CSV/HTML (default: 30000)
     """
     annotations = []
-      loaders = {'.html': load_html_usv, '.csv': load_csv_usv, '.xlsx': load_excel_usv}
-      for f in files:
+    loaders = {'.html': load_html_usv, '.csv': load_csv_usv, '.xlsx': load_excel_usv}
+    for f in files:
         usv_data = loaders[file_ext](f)
         low_freq = freq_min
         high_freq = freq_max        
