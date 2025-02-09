@@ -32,15 +32,15 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
     if call_type_defs is None:
         call_type_defs = {
          "22kHz": {"freq_min": 15,
-                           "freq_max": 45,
-                           "freq_span_max": 10, 
-                           "duration_min": 0.03,
-                           "duration_max": 3.0},
+                    "freq_max": 45,
+                    "freq_span_max": 10, 
+                    "duration_min": 0.03,
+                    "duration_max": 3.0},
          "50kHz": {"freq_min": 40,
-                           "freq_max": 80,
-                           "freq_span_max": 10, 
-                           "duration_min": 0.01,
-                           "duration_max": 0.3},         
+                    "freq_max": 80,
+                    "freq_span_max": 10, 
+                    "duration_min": 0.01,
+                    "duration_max": 0.3},         
          }
 
     # Re-apply Otsu's Thresholding
@@ -74,7 +74,7 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
         for call_type, call_def in call_type_defs.items():
           if (freq_start > call_def["freq_min"] and 
               freq_end < call_def["freq_max"] and 
-              freq_span < call_def["freq_span"] and
+              freq_span < call_def["freq_span_max"] and
               call_def["duration_max"] >= duration >= call_def["duration_min"]):
 
               usv_details.append({
