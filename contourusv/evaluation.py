@@ -51,7 +51,7 @@ def evaluate_predictions(filename, sample_labels, predicted_sample_labels,
     fn = np.sum((sample_labels == 1) & (predicted_sample_labels == 0))
 
     # Normalize TP, FP, TN, FN
-    tp, fp, tn, fn = [count/total_samples for count in [tp, fp, tn, fn]]
+    tp, fp, tn, fn = np.array([tp, fp, tn, fn])/total_samples
 
     # Calculate metrics
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0
