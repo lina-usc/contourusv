@@ -71,48 +71,30 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
         freq_span = freq_end - freq_start
         
         # For 22 kHz USVs
-        if freq_start > 15 and freq_end < 45 and freq_span < 10:
-            if duration > 0.03 and duration < 3.0:
-                usv_details.append({
-                    'bounding_box': (x, y, w, h),
-                    'duration': (x, x + w),
-                    'duration_start': duration_start,
-                    'duration_end': duration_end,
-                    'freq_start': freq_start,
-                    'freq_end': freq_end
-                })
+        for call_type, call_def in call_type_defs.items():
+          if (freq_start > call_def["freq_min"] and 
+              freq_end < call_def["freq_max"] and 
+              freq_span < call_def["freq_span"] and
+              call_def["duration_max"] >= duration >= call_def["duration_min"]):
 
-                annotations.append({
-                    'file': file_name.name,
-                    'begin_time': duration_start,
-                    'end_time': duration_end,
-                    'low_freq': freq_start,
-                    'high_freq': freq_end,
-                    'duration': duration,
-                    'USV_TYPE': '22khz'
-                })
+              usv_details.append({
+                  'bounding_box': (x, y, w, h),
+                  'duration': (x, x + w),
+                  'duration_start': duration_start,
+                  'duration_end': duration_end,
+                  'freq_start': freq_start,
+                  'freq_end': freq_end
+              })
 
-        # For 50 kHz USVs
-        if freq_start > 40 and freq_end < 80 and freq_span < 10:
-            if duration > 0.01 and duration < 0.3:
-                usv_details.append({
-                    'bounding_box': (x, y, w, h),
-                    'duration': (x, x + w),
-                    'duration_start': duration_start,
-                    'duration_end': duration_end,
-                    'freq_start': freq_start,
-                    'freq_end': freq_end
-                })
-
-                annotations.append({
-                    'file': file_name.name,
-                    'begin_time': duration_start,
-                    'end_time': duration_end,
-                    'low_freq': freq_start,
-                    'high_freq': freq_end,
-                    'duration': duration,
-                    'USV_TYPE': '50khz'
-                })
+              annotations.append({
+                  'file': file_name.name,
+                  'begin_time': duration_start,
+                  'end_time': duration_end,
+                  'low_freq': freq_start,
+                  'high_freq': freq_end,
+                  'duration': duration,
+                  'USV_TYPE': call_type
+              })
     # Annotate the image with the bounding boxes
     image_with_annotations = cv2.cvtColor(
         thresholded_image, cv2.COLOR_GRAY2BGR)
