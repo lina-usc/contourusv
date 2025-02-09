@@ -41,7 +41,8 @@ def low_pass_filter(data, cutoff, fs, order=5):
     return y
 
 
-def run_detection(root_path, file_name, experiment, trial, overlap=3, winlen=10, freq_min=15, freq_max=115, wsize=2500, th_perc=95):
+def run_detection(root_path, file_name, experiment, trial, overlap=3,
+                  winlen=10, freq_min=15, freq_max=115, wsize=2500, th_perc=95):
     """
     Process audio file to detect ultrasonic vocalizations (USVs).
 
