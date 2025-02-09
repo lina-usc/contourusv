@@ -104,41 +104,28 @@ def save_annotations(files, audio_file_name, output_path, file_ext,
         Default maximum frequency (Hz) for CSV/HTML (default: 30000)
     """
     annotations = []
-    for f in files:
-        if file_ext == '.html':
-            usv_data = load_html_usv(f)
-            low_freq = freq_min
-            high_freq = freq_max
-            for _, row in usv_data.iterrows():
-                annotations.append({
-                    'begin_file': audio_file_name.stem,
-                    'begin_time': row['begin_time'],
-                    'end_time': row['end_time'],
-                    'low_freq': low_freq,
-                    'high_freq': high_freq,
-                    'usv_type': row['usv_type']
-                })
-        elif file_ext == '.xlsx':
-            usv_data = load_excel_usv(f)
-            for _, row in usv_data.iterrows():
-                annotations.append({
-                    'begin_file': audio_file_name.stem,
-                    'begin_time': row['begin_time'],
-                    'end_time': row['end_time'],
-                    'low_freq': row.get('low_freq', freq_min) * 1000,
-                    'high_freq': row.get('high_freq', freq_max) * 1000,
-                    'usv_type': row.get('usv_type', '')
-                })
-        elif file_ext == '.csv':
-            usv_data = load_csv_usv(f)
-            for _, row in usv_data.iterrows():
-                annotations.append({
-                    'begin_file': audio_file_name.stem,
-                    'begin_time': row['begin_time'],
-                    'end_time': row['end_time'],
-                    'low_freq': freq_min,
-                    'high_freq': freq_max,
-                    'usv_type': ''
+      loaders = {'.html': load_html_usv, '.csv': load_csv_usv, '.xlsx': load_excel_usv}
+      for f in files:
+        usv_data = loaders[file_ext](f)
+        low_freq = freq_min
+        high_freq = freq_max        
+        for _, row in usv_data.iterrows():
+            if file_ext == '.html':
+                usv_type = row['usv_type']
+            elif file_ext == '.xlsx':
+                low_freq = row.get('low_freq', freq_min) * 1000
+                high_freq = row.get('high_freq', freq_max) * 1000
+                usv_type =  row.get('usv_type', '')
+            elif file_ext == '.csv':
+                 usv_type = ''
+            
+            annotations.append({
+                'begin_file': audio_file_name.stem,
+                'begin_time': row['begin_time'],
+                'end_time': row['end_time'],
+                'low_freq': low_freq,
+                'high_freq': high_freq,
+                'usv_type': usv_type
                 })
 
     if annotations:
