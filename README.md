@@ -1,6 +1,207 @@
-# contourusv
-This repository contains the source code for ContourUSV detector. The code can be tested with the open source USVSEG dataset.
+# ContourUSV: Ultrasonic Vocalization Detection Pipeline
 
-# Installation
+![Python Version](https://img.shields.io/badge/python-%3E%3D3.9-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-Python 3.9 or above required.
+ContourUSV is an automated pipeline for detecting ultrasonic vocalizations (USVs) in audio recordings. The system uses spectrogram analysis combined with advanced image processing techniques to identify and classify 22kHz and 50kHz USVs.
+
+<!-- ## Features
+
+- Audio preprocessing with bandpass filtering and normalization
+- Spectrogram generation with customizable parameters
+- Advanced image processing for noise reduction:
+  - Median filtering
+  - Otsu's thresholding
+  - Contrast Limited Adaptive Histogram Equalization (CLAHE)
+  - Morphological operations
+- Contour-based USV detection
+- Annotation generation from multiple file formats (HTML, Excel, CSV)
+- Comprehensive evaluation metrics:
+  - Precision, Recall, F1 Score, Specificity
+  - Carbon emissions tracking via CodeCarbon
+- Parallel processing support -->
+
+## Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/contourusv.git
+   cd contourusv
+   ```
+
+2. **Create and activate virtual environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/MacOS
+   venv\Scripts\activate     # Windows
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -e .
+   ```
+
+## Data Directory Structure
+
+Organize your input data using the following structure:
+
+```
+root_path/                  # Passed via --root_path argument
+├── EXPERIMENT_NAME/        # Passed via --experiment argument
+│   └── TRIAL_NAME/         # Passed via --trial argument
+│       ├── *.wav           # Audio recordings
+│       ├── *.WAV           # (Alternative capitalization)
+│       ├── *.html          # HTML annotations
+│       ├── *.xlsx          # Excel annotations
+│       └── *.csv           # CSV annotations
+```
+
+**Example Concrete Structure:**
+```
+/Users/username/data/
+└── PTSD16/
+    └── ACQ/
+        ├── rat12_day1.wav
+        ├── rat12_day1.html
+        ├── rat13_day1.WAV
+        └── rat13_day1.html
+```
+
+**File Requirements:**
+- Audio files: Must have `.wav` or `.WAV` extension
+- Annotation files: Must match audio filenames and reside in same directory
+- Supported annotation formats:
+  - HTML
+  - Excel
+  - CSV
+
+## Output Structure
+
+```
+output/
+├── EXPERIMENT_NAME/
+│   ├── TRIAL_NAME/
+│   │   ├── contour_detections/
+│   │   │   └── *.csv (detection annotations)
+│   │   ├── evaluation_results/
+│   │   │   └── Evaluation_*.csv (performance metrics)
+│   │   └── spectrograms/
+│   │       └── *.png (annotated spectrograms)
+│   └── ground_truth_annotations/
+│       └── *.csv (processed ground truth)
+```
+
+## Usage
+
+In the `src` directory execute the following command to run the detection pipeline.
+
+### Basic Command
+```bash
+python main.py \
+  --root_path /path/to/your/data \
+  --experiment EXPERIMENT_NAME \
+  --trial TRIAL_NAME \
+  --file_ext ANNOTATION_FILE_EXT
+```
+
+### Example Command
+```bash
+python main.py \
+  --root_path /Users/username/data \
+  --experiment PTSD16 \
+  --trial ACQ \
+  --file_ext .html
+```
+
+### Required Arguments
+| Argument      | Description                               | Example          |
+|---------------|-------------------------------------------|------------------|
+| `--root_path` | Root directory containing experiment data | `/data/studies`  |
+| `--experiment`| Name of the experiment                    | `PTSD16`         |
+| `--trial`     | Name of the trial/condition               | `ACQ`            |
+| `--file_ext`  | Annotation file extension (`.html`, `.xlsx`, `.csv`) | `.html` |
+
+### Optional Parameters
+| Parameter      | Default | Description                              |
+|----------------|---------|------------------------------------------|
+| `--overlap`    | 3       | Overlap duration between windows (seconds) |
+| `--winlen`     | 10      | Window length for processing (seconds)   |
+| `--freq_min`   | 15      | Minimum frequency for detection (kHz)    |
+| `--freq_max`   | 115     | Maximum frequency for detection (kHz)    |
+| `--wsize`      | 2500    | Window size for processing               |
+| `--th_perc`    | 95      | Percentile threshold for noise reduction |
+
+<!-- ## Pipeline Architecture
+
+1. **Preprocessing**
+   - Audio normalization and filtering
+   - Spectrogram generation
+   - Noise reduction using:
+     - Median filtering
+     - Otsu's thresholding
+     - CLAHE contrast enhancement
+
+2. **Detection**
+   - Contour detection using OpenCV
+   - USV classification (22kHz vs 50kHz)
+   - Bounding box annotation
+   - Temporal and spectral feature extraction
+
+3. **Annotation Generation**
+   - Supports multiple input formats:
+     - HTML
+     - Excel
+     - CSV
+
+4. **Evaluation**
+   - Precision/Recall calculations
+   - F1 Score and Specificity metrics
+   - Carbon emissions tracking
+   - Energy consumption monitoring
+
+## Evaluation Metrics
+
+The pipeline calculates four key performance metrics:
+- **Precision**: Ratio of correct USV detections to total detections
+- **Recall**: Ratio of detected USVs to total actual USVs
+- **F1 Score**: Harmonic mean of precision and recall
+- **Specificity**: Ability to identify true negative segments
+
+Example output:
+```
+Mean Precision: 0.92 ± 0.05
+Mean Recall: 0.88 ± 0.07
+Mean F1 Score: 0.90 ± 0.04
+Mean Specificity: 0.95 ± 0.03
+```
+
+## Environmental Impact Tracking
+
+The pipeline integrates with CodeCarbon to monitor:
+- CO₂ emissions (kg)
+- Energy consumption (kWh)
+- Computational efficiency
+
+Sample output:
+```
+ContourUSV_Execution_Time_(s) = 452.783
+ContourUSV_Carbon_Emissions_(kgCO2) = 0.127
+ContourUSV_Total_Energy_Consumed_(kWh) = 0.342
+``` -->
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin feature/your-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+Sabah Anis - [sabahanis98@gmail.com](mailto:sabahanis98@gmail.com)
