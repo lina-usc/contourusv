@@ -62,7 +62,15 @@ def evaluate_predictions(filename, sample_labels, predicted_sample_labels, total
     print(
         f"Precision: {precision}, Recall: {recall}, F1 Score: {f1_score}, Specificity: {specificity}")
 
-    return {"Filename": filename, "TP": tp, "FP": fp, "TN": tn, "FN": fn, "Precision": precision, "Recall": recall, "F1 Score": f1_score, "Specificity": specificity}
+    return {"Filename": filename,
+            "TP": tp,
+            "FP": fp,
+            "TN": tn,
+            "FN": fn,
+            "Precision": precision,
+            "Recall": recall,
+            "F1 Score": f1_score,
+            "Specificity": specificity}
 
 
 def get_sample_labels(audio_file, actual_labels, predicted_labels):
