@@ -36,11 +36,12 @@ jobs:
 
     - name: Deploy to GitHub Pages
       run: |
+            cd ../
             git checkout --orphan gh-pages
             git rm -rf .
             cp -r docs/_build/html/* .
             git add .
             git commit -m "Deploy docs"
             git push origin gh-pages --force
-            
+
 
