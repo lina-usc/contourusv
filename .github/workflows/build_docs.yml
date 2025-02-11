@@ -30,7 +30,7 @@ jobs:
 
     - name: Build the documentation
       run: |
-        sphinx-apidoc -o docs/ contourusv/     
+        sphinx-apidoc -o docs/ src/     
         cd docs
         make html
     - name: Upload documentation to GitHub Pages
