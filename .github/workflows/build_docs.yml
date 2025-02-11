@@ -33,8 +33,9 @@ jobs:
         sphinx-apidoc -o docs/ src/     
         cd docs
         make html
-    - name: Upload documentation to GitHub Pages
+        
+    - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
-        deploy_key: ${{ secrets.DEPLOY_KEY }}  # Use your deploy key to push to GitHub Pages
-        publish_dir: ./docs/build  # Path to the generated HTML docs
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/_build/html
