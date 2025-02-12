@@ -23,7 +23,6 @@ def load_annotation(predicted_labels, actual_labels):
 
 def evaluate_predictions(filename, sample_labels, predicted_sample_labels, total_samples):
     """
-    SOME CHANGE HERE
     Calculate evaluation metrics for USV predictions.
 
     Parameters
