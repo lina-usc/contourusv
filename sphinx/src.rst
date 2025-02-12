@@ -1,8 +1,6 @@
-ContourUSV
+Classes
 ===========
 
-Classes
-----------
 
 src.detection module
 --------------------
