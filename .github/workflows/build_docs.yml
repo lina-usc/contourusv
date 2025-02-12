@@ -28,11 +28,11 @@ jobs:
         pip install sphinx
         pip install sphinx_rtd_theme
 
-    # - name: Build the documentation
-    #   run: |
-    #     # Generate reStructuredText files from the source code
-    #     sphinx-apidoc -o sphinx/ src/
+    - name: Build the documentation
+      run: |
+        # Generate reStructuredText files from the source code
+        sphinx-apidoc -o sphinx/ src/
           
-    #     # Build the HTML documentation
-    #     sphinx-build -b html sphinx/ docs/
+        # Build the HTML documentation
+        sphinx-build -b html sphinx/ docs/
       

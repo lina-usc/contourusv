@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+src/__init__.py
+src/detection.py
+src/evaluation.py
+src/generate_annotation.py
+src/main.py
+src/preprocessing.py
+src/contourusv.egg-info/PKG-INFO
+src/contourusv.egg-info/SOURCES.txt
+src/contourusv.egg-info/dependency_links.txt
+src/contourusv.egg-info/requires.txt
+src/contourusv.egg-info/top_level.txt

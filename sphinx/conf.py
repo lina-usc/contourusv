@@ -11,8 +11,8 @@ sys.path.insert(0, os.path.abspath('..'))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'ContourUSV'
-copyright = '2025, Sabah Anis'
-author = 'Sabah Anis'
+copyright = "2025, Sabah Anis, Christian O'Reilly"
+author = "Sabah Anis, Christian O'Reilly"
 release = '1.0.0'
 
 # -- General configuration ---------------------------------------------------

@@ -1,23 +1,23 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../">
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>evaluation &mdash; ContourUSV 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+  <title>src.evaluation &mdash; ContourUSV 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
-      <script src="../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8d563738"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -28,38 +28,35 @@
 
           
           
-          <a href="../index.html" class="icon icon-home">
+          <a href="../../index.html" class="icon icon-home">
             ContourUSV
           </a>
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../modules.html">src</a></li>
-</ul>
-
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
         </div>
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ContourUSV</a>
+          <a href="../../index.html">ContourUSV</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
-      <li class="breadcrumb-item active">evaluation</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.evaluation</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -68,7 +65,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for evaluation</h1><div class="highlight"><pre>
+  <h1>Source code for src.evaluation</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
@@ -76,7 +73,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">wavfile</span>
 
 <div class="viewcode-block" id="has_columns">
-<a class="viewcode-back" href="../evaluation.html#evaluation.has_columns">[docs]</a>
+<a class="viewcode-back" href="../../src.html#src.evaluation.has_columns">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">has_columns</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">first_line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
@@ -85,7 +82,7 @@
 
 
 <div class="viewcode-block" id="load_annotation">
-<a class="viewcode-back" href="../evaluation.html#evaluation.load_annotation">[docs]</a>
+<a class="viewcode-back" href="../../src.html#src.evaluation.load_annotation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_annotation</span><span class="p">(</span><span class="n">predicted_labels</span><span class="p">,</span> <span class="n">actual_labels</span><span class="p">):</span>
     <span class="c1"># Load the dataframes</span>
     <span class="n">predicted_labels</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">predicted_labels</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -99,7 +96,7 @@
 
 
 <div class="viewcode-block" id="evaluate_predictions">
-<a class="viewcode-back" href="../evaluation.html#evaluation.evaluate_predictions">[docs]</a>
+<a class="viewcode-back" href="../../src.html#src.evaluation.evaluate_predictions">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">evaluate_predictions</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">sample_labels</span><span class="p">,</span> <span class="n">predicted_sample_labels</span><span class="p">,</span> <span class="n">total_samples</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate evaluation metrics for USV predictions.</span>
@@ -154,7 +151,7 @@
 
 
 <div class="viewcode-block" id="get_sample_labels">
-<a class="viewcode-back" href="../evaluation.html#evaluation.get_sample_labels">[docs]</a>
+<a class="viewcode-back" href="../../src.html#src.evaluation.get_sample_labels">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_sample_labels</span><span class="p">(</span><span class="n">audio_file</span><span class="p">,</span> <span class="n">actual_labels</span><span class="p">,</span> <span class="n">predicted_labels</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert time-based annotations to sample-wise binary labels.</span>
@@ -215,7 +212,7 @@
 
 
 <div class="viewcode-block" id="run_evaluation">
-<a class="viewcode-back" href="../evaluation.html#evaluation.run_evaluation">[docs]</a>
+<a class="viewcode-back" href="../../src.html#src.evaluation.run_evaluation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">run_evaluation</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">root_path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run full evaluation pipeline for an experiment.</span>
@@ -332,7 +329,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, Sabah Anis.</p>
+    <p>&#169; Copyright 2025, Sabah Anis, Christian O&#39;Reilly.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
