@@ -1,3 +1,5 @@
 def Test():
-    """Test function"""
+    """
+    Test function
+    """
     return "Test"
