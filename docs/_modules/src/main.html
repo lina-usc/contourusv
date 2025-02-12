@@ -1,0 +1,345 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.main &mdash; ContourUSV 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ContourUSV
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../src.html">src package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ContourUSV</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.main</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.main</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">wavfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">codecarbon</span><span class="w"> </span><span class="kn">import</span> <span class="n">EmissionsTracker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">spectrogram</span><span class="p">,</span> <span class="n">butter</span><span class="p">,</span> <span class="n">filtfilt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">clean_spec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_evaluation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">detection</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect_contours</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">generate_annotation</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_annotations</span>
+
+<div class="viewcode-block" id="low_pass_filter">
+<a class="viewcode-back" href="../../src.html#src.main.low_pass_filter">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">low_pass_filter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply a Butterworth low-pass filter to input data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : ndarray</span>
+<span class="sd">        Input signal to be filtered</span>
+<span class="sd">    cutoff : float</span>
+<span class="sd">        Cutoff frequency in Hz</span>
+<span class="sd">    fs : float</span>
+<span class="sd">        Sampling frequency in Hz</span>
+<span class="sd">    order : int, optional</span>
+<span class="sd">        Filter order (default: 5)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Filtered output signal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nyquist</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">fs</span>
+    <span class="n">normal_cutoff</span> <span class="o">=</span> <span class="n">cutoff</span> <span class="o">/</span> <span class="n">nyquist</span>
+    <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">normal_cutoff</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;low&#39;</span><span class="p">,</span> <span class="n">analog</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">filtfilt</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+
+
+<div class="viewcode-block" id="run_detection">
+<a class="viewcode-back" href="../../src.html#src.main.run_detection">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_detection</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                  <span class="n">winlen</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">freq_min</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">freq_max</span><span class="o">=</span><span class="mi">115</span><span class="p">,</span> <span class="n">wsize</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span> <span class="n">th_perc</span><span class="o">=</span><span class="mi">95</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process audio file to detect ultrasonic vocalizations (USVs).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    root_path : Path</span>
+<span class="sd">        Root directory for input/output data</span>
+<span class="sd">    file_name : Path</span>
+<span class="sd">        Path to audio file to process</span>
+<span class="sd">    experiment : str</span>
+<span class="sd">        Name of the experiment</span>
+<span class="sd">    trial : str</span>
+<span class="sd">        Name of the trial/condition</span>
+<span class="sd">    overlap : int, optional</span>
+<span class="sd">        Overlap between processing windows in seconds (default: 3)</span>
+<span class="sd">    winlen : int, optional</span>
+<span class="sd">        Window length for processing in seconds (default: 10)</span>
+<span class="sd">    freq_min : int, optional</span>
+<span class="sd">        Minimum frequency for USV detection in kHz (default: 15)</span>
+<span class="sd">    freq_max : int, optional</span>
+<span class="sd">        Maximum frequency for USV detection in kHz (default: 115)</span>
+<span class="sd">    wsize : int, optional</span>
+<span class="sd">        Spectrogram window size (default: 2500)</span>
+<span class="sd">    th_perc : float, optional</span>
+<span class="sd">        Percentile threshold for noise reduction (default: 95)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">        Outputs:</span>
+<span class="sd">        - Annotated spectrogram images in {root_path}/output/spectrograms/</span>
+<span class="sd">        - Detection annotations in {root_path}/output/contour_detections/</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sfreq</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">wavfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing </span><span class="si">{</span><span class="n">file_name</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">... Sampling Frequency: </span><span class="si">{</span><span class="n">sfreq</span><span class="si">}</span><span class="s2"> Hz...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># # Apply low-pass filter</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">low_pass_filter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mi">120000</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="n">sfreq</span><span class="p">)</span>
+
+    <span class="c1"># Normalize the audio data</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+    <span class="c1"># Calculate the total time in seconds</span>
+    <span class="n">total_time</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">/</span> <span class="n">sfreq</span>
+
+    <span class="c1"># Generate the time array</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="o">/</span> <span class="n">sfreq</span>
+
+    <span class="n">annotations</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Reset annotations for each audio file</span>
+
+    <span class="c1"># Loop through the entire audio in 10-second windows with a 3-second overlap</span>
+    <span class="k">for</span> <span class="n">start_time</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">total_time</span><span class="p">,</span> <span class="n">winlen</span><span class="p">):</span>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">+</span> <span class="n">winlen</span> <span class="o">+</span> <span class="n">overlap</span>
+        <span class="k">if</span> <span class="n">end_time</span> <span class="o">&gt;</span> <span class="n">total_time</span><span class="p">:</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">total_time</span>
+
+        <span class="c1"># Extract the segment of audio for this time window</span>
+        <span class="n">start_sample</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_time</span> <span class="o">*</span> <span class="n">sfreq</span><span class="p">)</span>
+        <span class="n">end_sample</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_time</span> <span class="o">*</span> <span class="n">sfreq</span><span class="p">)</span>
+        <span class="n">data_segment</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">start_sample</span><span class="p">:</span><span class="n">end_sample</span><span class="p">]</span>
+        
+        <span class="c1">#Define spectrogram parameters</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="s1">&#39;hann&#39;</span>
+        <span class="n">nperseg</span> <span class="o">=</span> <span class="mi">512</span>
+        <span class="n">noverlap</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.75</span> <span class="o">*</span> <span class="n">nperseg</span><span class="p">)</span>
+        <span class="n">nfft</span> <span class="o">=</span> <span class="mi">512</span>
+        <span class="n">scaling</span> <span class="o">=</span> <span class="s1">&#39;density&#39;</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;magnitude&#39;</span>
+
+        <span class="c1"># Compute spectrogram</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Sxx</span> <span class="o">=</span> <span class="n">spectrogram</span><span class="p">(</span><span class="n">data_segment</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">nperseg</span><span class="o">=</span><span class="n">nperseg</span><span class="p">,</span>
+                                <span class="n">noverlap</span><span class="o">=</span><span class="n">noverlap</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="n">nfft</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="n">scaling</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+
+        <span class="n">Sxx</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Sxx</span> <span class="o">+</span> <span class="mf">1e-10</span><span class="p">)</span>
+
+        <span class="c1"># Convert frequencies to kHz</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">f</span> <span class="o">/</span> <span class="mi">1000</span>
+
+        <span class="c1"># Noise reduction: apply a decibel threshold</span>
+        <span class="n">noise_floor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">Sxx</span><span class="p">,</span> <span class="n">th_perc</span><span class="p">)</span>
+        <span class="n">Sxx</span><span class="p">[</span><span class="n">Sxx</span> <span class="o">&lt;</span> <span class="n">noise_floor</span><span class="p">]</span> <span class="o">=</span> <span class="n">noise_floor</span>
+
+        <span class="n">cleaned_image</span> <span class="o">=</span> <span class="n">clean_spec</span><span class="p">(</span><span class="n">Sxx</span><span class="p">)</span>
+        <span class="n">final_image</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">detect_contours</span><span class="p">(</span><span class="n">cleaned_image</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">freq_min</span><span class="p">,</span> <span class="n">freq_max</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">annotations</span><span class="p">)</span>
+
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1">/output/</span><span class="si">{</span><span class="n">experiment</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">trial</span><span class="si">}</span><span class="s1">/spectrograms/</span><span class="si">{</span><span class="n">file_name</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># Ensure output directory exists</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Visualize the spectrograms</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">final_image</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Frequency (kHz)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">,</span>
+            <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Save annotations to a DataFrame for the current audio file</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;begin_time&#39;</span><span class="p">)</span>
+    <span class="c1"># Convert the numerical columns to 0.2f precision</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># Filter duplicate annotations based on the begin_time and end_time columns</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span>
+        <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;begin_time&#39;</span><span class="p">,</span> <span class="s1">&#39;end_time&#39;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
+
+    <span class="n">output_annotation_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1">/output/</span><span class="si">{</span><span class="n">experiment</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">trial</span><span class="si">}</span><span class="s1">/contour_detections/</span><span class="si">{</span><span class="n">audio_file</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s1">.csv&#39;</span>
+    <span class="n">Path</span><span class="p">(</span><span class="n">output_annotation_file</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span>
+        <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">output_annotation_file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saved annotations to </span><span class="si">{</span><span class="n">output_annotation_file</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    USV Detection Pipeline main entry point.</span>
+
+<span class="sd">    Processes audio files to detect ultrasonic vocalizations, generates ground truth</span>
+<span class="sd">    annotations, runs evaluation metrics, and tracks computational resources.</span>
+
+<span class="sd">    Command Line Arguments:</span>
+<span class="sd">    --root_path : Root directory containing experiment data</span>
+<span class="sd">    --experiment : Name of the experiment (e.g., PTSD16)</span>
+<span class="sd">    --trial : Trial/condition name (e.g., ACQ)</span>
+<span class="sd">    --file_ext : Annotation file extension (.html, .xlsx, .csv)</span>
+<span class="sd">    [Other arguments...]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;USV Detection Pipeline&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--root_path&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;/Users/username/data&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Root path to the experiment data&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--experiment&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;PTSD16&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Experiment name&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--trial&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;ACQ&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;trial name&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--overlap&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Overlap duration&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--winlen&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Window length&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--freq_min&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Minimum frequency&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--freq_max&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">115</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum frequency&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--wsize&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Window size&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--th_perc&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">95</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Threshold percentage&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--file_ext&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;.html&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;File extension to process (.html, .xlsx, .csv)&quot;</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="n">root_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">root_path</span><span class="p">)</span>
+    <span class="n">experiment</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">experiment</span>
+    <span class="n">trial</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">trial</span>
+    <span class="n">file_ext</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">file_ext</span>
+
+    <span class="n">ac_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;overlap&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">overlap</span><span class="p">,</span>
+        <span class="s2">&quot;winlen&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">winlen</span><span class="p">,</span>
+        <span class="s2">&quot;freq_min&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">freq_min</span><span class="p">,</span>
+        <span class="s2">&quot;freq_max&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">freq_max</span><span class="p">,</span>
+        <span class="s2">&quot;wsize&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">wsize</span><span class="p">,</span>
+        <span class="s2">&quot;th_perc&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">th_perc</span>
+    <span class="p">}</span>
+
+    <span class="n">files_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">experiment</span> <span class="o">/</span> <span class="n">trial</span>
+    <span class="n">output_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1">/output/</span><span class="si">{</span><span class="n">experiment</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">trial</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">Path</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">audio_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">files_path</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span>
+        <span class="s2">&quot;*.wav&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">files_path</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.WAV&quot;</span><span class="p">)))</span>
+
+    <span class="c1"># Measure the time and energy taken to execute the pipeline</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">tracker</span> <span class="o">=</span> <span class="n">EmissionsTracker</span><span class="p">(</span><span class="n">output_dir</span><span class="o">=</span><span class="n">output_path</span><span class="p">)</span>
+    <span class="n">tracker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="c1"># Run detection for each audio file</span>
+    <span class="k">for</span> <span class="n">audio_file</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">audio_files</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Running Detection on audio files for </span><span class="si">{</span><span class="n">experiment</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">trial</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="n">run_detection</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">audio_file</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="o">**</span><span class="n">ac_kwargs</span><span class="p">)</span>
+    
+    <span class="c1"># Generate ground truth annotations</span>
+    <span class="n">generate_annotations</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">root_path</span><span class="p">,</span> <span class="n">file_ext</span><span class="p">)</span>
+
+    <span class="c1"># Run evaluation</span>
+    <span class="n">run_evaluation</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">root_path</span><span class="p">)</span>
+
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">total_time</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+    <span class="n">emissions</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">tracker</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+    <span class="n">total_energy</span> <span class="o">=</span> <span class="n">tracker</span><span class="o">.</span><span class="n">final_emissions_data</span><span class="o">.</span><span class="n">energy_consumed</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ContourUSV Detection Pipeline Executed for </span><span class="si">{</span><span class="n">experiment</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">trial</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;---------------------------------------------------&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ContourUSV_Execution_Time_(s) = </span><span class="si">{</span><span class="n">total_time</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ContourUSV_Carbon_Emissions_(kgCO2) = </span><span class="si">{</span><span class="n">emissions</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ContourUSV_Total_Energy_Consumed_(kWh) = </span><span class="si">{</span><span class="n">total_energy</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Sabah Anis, Christian O&#39;Reilly.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
