@@ -55,5 +55,3 @@ jobs:
         git add docs/ -f
         git commit -m "Add generated Sphinx documentation"
         git push origin main
-
-      
