@@ -30,8 +30,7 @@ jobs:
         # Install missing dependencies
         pip install opencv-python numpy pandas
         pip install tqdm scipy
-
-
+        pip install matplotlib
 
     - name: Build the documentation
       run: |
