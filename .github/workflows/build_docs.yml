@@ -31,6 +31,7 @@ jobs:
         pip install opencv-python numpy pandas
         pip install tqdm scipy
         pip install matplotlib
+        pip install codecarbon
 
     - name: Build the documentation
       run: |
