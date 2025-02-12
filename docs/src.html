@@ -65,7 +65,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#src.generate_annotation.save_annotations"><code class="docutils literal notranslate"><span class="pre">save_annotations()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#src-main-module">src.main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.main">src.main module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.main.low_pass_filter"><code class="docutils literal notranslate"><span class="pre">low_pass_filter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.main.run_detection"><code class="docutils literal notranslate"><span class="pre">run_detection()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-src.preprocessing">src.preprocessing module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#src.preprocessing.clean_spec"><code class="docutils literal notranslate"><span class="pre">clean_spec()</span></code></a></li>
 </ul>
@@ -307,8 +311,60 @@ total_samples: Length of audio file in samples</p>
 </dd></dl>
 
 </section>
-<section id="src-main-module">
-<h2>src.main module<a class="headerlink" href="#src-main-module" title="Link to this heading"></a></h2>
+<section id="module-src.main">
+<span id="src-main-module"></span><h2>src.main module<a class="headerlink" href="#module-src.main" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.main.low_pass_filter">
+<span class="sig-prename descclassname"><span class="pre">src.main.</span></span><span class="sig-name descname"><span class="pre">low_pass_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/main.html#low_pass_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.main.low_pass_filter" title="Link to this definition"></a></dt>
+<dd><p>Apply a Butterworth low-pass filter to input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em>) – Input signal to be filtered</p></li>
+<li><p><strong>cutoff</strong> (<em>float</em>) – Cutoff frequency in Hz</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – Sampling frequency in Hz</p></li>
+<li><p><strong>order</strong> (<em>int</em><em>, </em><em>optional</em>) – Filter order (default: 5)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Filtered output signal</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.main.run_detection">
+<span class="sig-prename descclassname"><span class="pre">src.main.</span></span><span class="sig-name descname"><span class="pre">run_detection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">winlen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">115</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">th_perc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">95</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/main.html#run_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.main.run_detection" title="Link to this definition"></a></dt>
+<dd><p>Process audio file to detect ultrasonic vocalizations (USVs).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root_path</strong> (<em>Path</em>) – Root directory for input/output data</p></li>
+<li><p><strong>file_name</strong> (<em>Path</em>) – Path to audio file to process</p></li>
+<li><p><strong>experiment</strong> (<em>str</em>) – Name of the experiment</p></li>
+<li><p><strong>trial</strong> (<em>str</em>) – Name of the trial/condition</p></li>
+<li><p><strong>overlap</strong> (<em>int</em><em>, </em><em>optional</em>) – Overlap between processing windows in seconds (default: 3)</p></li>
+<li><p><strong>winlen</strong> (<em>int</em><em>, </em><em>optional</em>) – Window length for processing in seconds (default: 10)</p></li>
+<li><p><strong>freq_min</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum frequency for USV detection in kHz (default: 15)</p></li>
+<li><p><strong>freq_max</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum frequency for USV detection in kHz (default: 115)</p></li>
+<li><p><strong>wsize</strong> (<em>int</em><em>, </em><em>optional</em>) – Spectrogram window size (default: 2500)</p></li>
+<li><p><strong>th_perc</strong> (<em>float</em><em>, </em><em>optional</em>) – Percentile threshold for noise reduction (default: 95)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Outputs:
+- Annotated spectrogram images in {root_path}/output/spectrograms/
+- Detection annotations in {root_path}/output/contour_detections/</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-src.preprocessing">
 <span id="src-preprocessing-module"></span><h2>src.preprocessing module<a class="headerlink" href="#module-src.preprocessing" title="Link to this heading"></a></h2>
