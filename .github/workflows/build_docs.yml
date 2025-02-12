@@ -48,7 +48,14 @@ jobs:
 
         # Add a .nojekyll file to bypass Jekyll processing on GitHub Pages
         touch ./docs/.nojekyll
-  
+
+    - name: Print directory structure and sys.path
+      run: |
+          echo "Current directory: $(pwd)"
+          echo "Python sys.path:"
+          python -c "import sys; print(sys.path)"
+          python -c "import preprocessing"  # Or any other module
+
     - name: Commit and push generated docs
       run: |
         git config --global user.email "dw42@email.sc.edu"  # Replace with your email
