@@ -44,14 +44,6 @@ src.preprocessing module
    :undoc-members:
    :show-inheritance:
 
-src.test module
----------------
-
-.. automodule:: src.test
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 
