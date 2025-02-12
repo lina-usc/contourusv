@@ -1,7 +1,7 @@
-src package
+ContourUSV
 ===========
 
-Submodules
+Classes
 ----------
 
 src.detection module
