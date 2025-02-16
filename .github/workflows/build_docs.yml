@@ -56,6 +56,10 @@ jobs:
       run: |
         git config --global user.email "dw42@email.sc.edu"  # Replace with your email
         git config --global user.name "Dallas Wade"  # Replace with your name
-        git add docs/ -f
+        git checkout gh-pages
+        git checkout main -- docs
+        git add *
         git commit -m "Add generated Sphinx documentation"
-        git push origin main
+        git push origin gh-pages
+        git checkout main
+        rm -rf docs/
