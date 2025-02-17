@@ -66,7 +66,7 @@ jobs:
           git checkout main -- docs/
 
           # Commit and push only docs to gh-pages
-          git add docs/
+          git add *
           git commit -m "Update Sphinx documentation"
           git push origin gh-pages
 
