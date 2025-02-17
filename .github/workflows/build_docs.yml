@@ -52,6 +52,10 @@ jobs:
 
         # Add a .nojekyll file to bypass Jekyll processing on GitHub Pages
         touch ./docs/.nojekyll
+
+        git add *
+        git commit -m "Adding docs"
+        git push origin main
   
     - name: Commit and push generated docs
       run: |
