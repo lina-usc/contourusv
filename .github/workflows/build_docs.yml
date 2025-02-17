@@ -58,8 +58,7 @@ jobs:
           git config --global user.name "Dallas Wade"
 
           # Ensure gh-pages branch exists and switch to it
-          git fetch origin gh-pages || git checkout --orphan gh-pages
-          git checkout gh-pages
+          git checkout -b gh-pages
           git pull origin gh-pages
 
           # Commit and push only docs to gh-pages
