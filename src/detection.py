@@ -3,7 +3,6 @@ import cv2
 def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, 
                                     file_name, annotations, call_type_defs=None):
     """
-    TESTING CHANGE
     Detect and classify USVs in cleaned spectrogram images.
 
     Parameters
