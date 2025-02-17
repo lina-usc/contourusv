@@ -1,0 +1,214 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.detection &mdash; ContourUSV 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ContourUSV
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../src.html">src package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ContourUSV</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.detection</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.detection</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+
+<div class="viewcode-block" id="detect_contours">
+<a class="viewcode-back" href="../../src.html#src.detection.detect_contours">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">detect_contours</span><span class="p">(</span><span class="n">cleaned_image</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">freq_min</span><span class="p">,</span> <span class="n">freq_max</span><span class="p">,</span> 
+                                    <span class="n">file_name</span><span class="p">,</span> <span class="n">annotations</span><span class="p">,</span> <span class="n">call_type_defs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    TESTING CHANGE</span>
+<span class="sd">    Detect and classify USVs in cleaned spectrogram images.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cleaned_image : ndarray</span>
+<span class="sd">        Preprocessed spectrogram image (2D array)</span>
+<span class="sd">    start_time : float</span>
+<span class="sd">        Start time of current processing window (seconds)</span>
+<span class="sd">    end_time : float</span>
+<span class="sd">        End time of current processing window (seconds)</span>
+<span class="sd">    freq_min : float</span>
+<span class="sd">        Minimum frequency bound for detection (kHz)</span>
+<span class="sd">    freq_max : float</span>
+<span class="sd">        Maximum frequency bound for detection (kHz)</span>
+<span class="sd">    file_name : Path</span>
+<span class="sd">        Source audio file path</span>
+<span class="sd">    annotations : list</span>
+<span class="sd">        List to accumulate detection annotations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        (annotated_image, updated_annotations)</span>
+<span class="sd">        annotated_image: RGB image with detection bounding boxes</span>
+<span class="sd">        updated_annotations: List of annotation dictionaries</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">call_type_defs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">call_type_defs</span> <span class="o">=</span> <span class="p">{</span>
+         <span class="s2">&quot;22kHz&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;freq_min&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+                    <span class="s2">&quot;freq_max&quot;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span>
+                    <span class="s2">&quot;freq_span_max&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> 
+                    <span class="s2">&quot;duration_min&quot;</span><span class="p">:</span> <span class="mf">0.03</span><span class="p">,</span>
+                    <span class="s2">&quot;duration_max&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">},</span>
+         <span class="s2">&quot;50kHz&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;freq_min&quot;</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span>
+                    <span class="s2">&quot;freq_max&quot;</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span>
+                    <span class="s2">&quot;freq_span_max&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> 
+                    <span class="s2">&quot;duration_min&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+                    <span class="s2">&quot;duration_max&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">},</span>         
+         <span class="p">}</span>
+
+    <span class="c1"># Re-apply Otsu&#39;s Thresholding</span>
+    <span class="n">ret</span><span class="p">,</span> <span class="n">thresholded_image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">threshold</span><span class="p">(</span>
+        <span class="n">cleaned_image</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">THRESH_BINARY</span> <span class="o">+</span> <span class="n">cv2</span><span class="o">.</span><span class="n">THRESH_OTSU</span><span class="p">)</span>
+
+    <span class="n">contours</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">findContours</span><span class="p">(</span>
+        <span class="n">thresholded_image</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">RETR_EXTERNAL</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CHAIN_APPROX_SIMPLE</span><span class="p">)</span>
+
+    <span class="c1"># Initialize a list to hold the details of each detected USV</span>
+    <span class="n">usv_details</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Process each contour</span>
+    <span class="k">for</span> <span class="n">contour</span> <span class="ow">in</span> <span class="n">contours</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">(</span><span class="n">contour</span><span class="p">)</span>
+        <span class="n">duration_start</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">+</span> \
+            <span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="n">thresholded_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
+        <span class="n">duration_end</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">+</span> \
+            <span class="p">((</span><span class="n">x</span> <span class="o">+</span> <span class="n">w</span><span class="p">)</span> <span class="o">/</span>
+                <span class="n">thresholded_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
+        <span class="n">freq_start</span> <span class="o">=</span> <span class="n">freq_min</span> <span class="o">+</span> \
+            <span class="p">(</span><span class="n">y</span> <span class="o">/</span> <span class="n">thresholded_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">freq_max</span> <span class="o">-</span> <span class="n">freq_min</span><span class="p">)</span>
+        <span class="n">freq_end</span> <span class="o">=</span> <span class="n">freq_min</span> <span class="o">+</span> \
+            <span class="p">((</span><span class="n">y</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span> <span class="o">/</span> <span class="n">thresholded_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">freq_max</span> <span class="o">-</span> <span class="n">freq_min</span><span class="p">)</span>
+
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">duration_end</span> <span class="o">-</span> <span class="n">duration_start</span>
+        <span class="c1"># Frequency span</span>
+        <span class="n">freq_span</span> <span class="o">=</span> <span class="n">freq_end</span> <span class="o">-</span> <span class="n">freq_start</span>
+        
+        <span class="c1"># For 22 kHz USVs</span>
+        <span class="k">for</span> <span class="n">call_type</span><span class="p">,</span> <span class="n">call_def</span> <span class="ow">in</span> <span class="n">call_type_defs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">freq_start</span> <span class="o">&gt;</span> <span class="n">call_def</span><span class="p">[</span><span class="s2">&quot;freq_min&quot;</span><span class="p">]</span> <span class="ow">and</span> 
+              <span class="n">freq_end</span> <span class="o">&lt;</span> <span class="n">call_def</span><span class="p">[</span><span class="s2">&quot;freq_max&quot;</span><span class="p">]</span> <span class="ow">and</span> 
+              <span class="n">freq_span</span> <span class="o">&lt;</span> <span class="n">call_def</span><span class="p">[</span><span class="s2">&quot;freq_span_max&quot;</span><span class="p">]</span> <span class="ow">and</span>
+              <span class="n">call_def</span><span class="p">[</span><span class="s2">&quot;duration_max&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">duration</span> <span class="o">&gt;=</span> <span class="n">call_def</span><span class="p">[</span><span class="s2">&quot;duration_min&quot;</span><span class="p">]):</span>
+
+              <span class="n">usv_details</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                  <span class="s1">&#39;bounding_box&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span>
+                  <span class="s1">&#39;duration&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="n">w</span><span class="p">),</span>
+                  <span class="s1">&#39;duration_start&#39;</span><span class="p">:</span> <span class="n">duration_start</span><span class="p">,</span>
+                  <span class="s1">&#39;duration_end&#39;</span><span class="p">:</span> <span class="n">duration_end</span><span class="p">,</span>
+                  <span class="s1">&#39;freq_start&#39;</span><span class="p">:</span> <span class="n">freq_start</span><span class="p">,</span>
+                  <span class="s1">&#39;freq_end&#39;</span><span class="p">:</span> <span class="n">freq_end</span>
+              <span class="p">})</span>
+
+              <span class="n">annotations</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                  <span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="n">file_name</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                  <span class="s1">&#39;begin_time&#39;</span><span class="p">:</span> <span class="n">duration_start</span><span class="p">,</span>
+                  <span class="s1">&#39;end_time&#39;</span><span class="p">:</span> <span class="n">duration_end</span><span class="p">,</span>
+                  <span class="s1">&#39;low_freq&#39;</span><span class="p">:</span> <span class="n">freq_start</span><span class="p">,</span>
+                  <span class="s1">&#39;high_freq&#39;</span><span class="p">:</span> <span class="n">freq_end</span><span class="p">,</span>
+                  <span class="s1">&#39;duration&#39;</span><span class="p">:</span> <span class="n">duration</span><span class="p">,</span>
+                  <span class="s1">&#39;USV_TYPE&#39;</span><span class="p">:</span> <span class="n">call_type</span>
+              <span class="p">})</span>
+    <span class="c1"># Annotate the image with the bounding boxes</span>
+    <span class="n">image_with_annotations</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span>
+        <span class="n">thresholded_image</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_GRAY2BGR</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">usv</span> <span class="ow">in</span> <span class="n">usv_details</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">usv</span><span class="p">[</span><span class="s1">&#39;bounding_box&#39;</span><span class="p">]</span>
+        <span class="n">cv2</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">image_with_annotations</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">w</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">h</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">final_image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span>
+        <span class="n">image_with_annotations</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">final_image</span><span class="p">,</span> <span class="n">annotations</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Sabah Anis, Christian O&#39;Reilly.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
