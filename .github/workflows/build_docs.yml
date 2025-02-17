@@ -54,12 +54,22 @@ jobs:
 
     - name: Commit and push generated docs
       run: |
-        git config --global user.email "dw42@email.sc.edu"  # Replace with your email
-        git config --global user.name "Dallas Wade"  # Replace with your name
-        git switch --orphan gh-pages
-        git checkout main -- docs
-        git add docs/
-        git commit -m "Add generated Sphinx documentation"
-        git push origin gh-pages --force
-        git checkout main
-        rm -rf docs/
+          git config --global user.email "dw42@email.sc.edu"
+          git config --global user.name "Dallas Wade"
+
+          # Ensure gh-pages branch exists and switch to it
+          git fetch origin gh-pages || git checkout --orphan gh-pages
+          git checkout gh-pages
+          git pull origin gh-pages
+
+          # Pull only the docs folder from main (without committing it in main)
+          git checkout main -- docs/
+
+          # Commit and push only docs to gh-pages
+          git add docs/
+          git commit -m "Update Sphinx documentation"
+          git push origin gh-pages
+
+          # Switch back to main and remove docs
+          git checkout main
+          rm -rf docs/
