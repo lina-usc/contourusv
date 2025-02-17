@@ -63,6 +63,8 @@ jobs:
           git checkout gh-pages
           git pull origin gh-pages --rebase  # Or --no-rebase based on your configuration
 
+          git checkout main -- docs/
+
           git clean -fdx
 
           # Commit and push only docs to gh-pages
