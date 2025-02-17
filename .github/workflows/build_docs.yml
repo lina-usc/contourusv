@@ -62,14 +62,14 @@ jobs:
           git checkout gh-pages
           git pull origin gh-pages
 
-          # Pull only the docs folder from main (without committing it in main)
-          git checkout main -- docs/
-
           # Commit and push only docs to gh-pages
-          git add *
+          git add docs/
           git commit -m "Update Sphinx documentation"
           git push origin gh-pages
 
-          # Switch back to main and remove docs
+          # Switch back to main and remove docs from the main branch
           git checkout main
           rm -rf docs/
+          git add -A
+          git commit -m "Remove docs folder from main branch"
+          git push origin main
