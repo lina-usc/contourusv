@@ -223,7 +223,7 @@ if __name__ == "__main__":
     generate_annotations(experiment, trial, root_path, file_ext)
 
     # Run evaluation
-    run_evaluation(experiment, trial, root_path)
+    # run_evaluation(experiment, trial, root_path)
 
     end_time = time.time()
     total_time = end_time - start_time

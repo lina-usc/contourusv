@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from scipy import ndimage
 
+
 def clean_spec(Sxx):
     """
     Preprocess spectrogram data for USV detection.
@@ -25,6 +26,8 @@ def clean_spec(Sxx):
     """
     # Apply median filter
     filtered_data = ndimage.median_filter(Sxx, 3)
+
+    # blurred_data = cv2.GaussianBlur(filtered_data, (5, 5), 0)
 
     # Normalize data for thresholding (0-255)
     norm_image = cv2.normalize(
