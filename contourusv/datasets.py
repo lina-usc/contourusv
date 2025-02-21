@@ -12,7 +12,7 @@ def get_usvseg(file_stem=None):
     # TODO: Accept specified root dataset path...
 
     if file_stem is None:
-        # dowload all files
+        # download all files
         # TODO
         pass
     else:
