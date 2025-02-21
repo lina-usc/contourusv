@@ -38,6 +38,8 @@ jobs:
       #  run: pip install -r requirements_testing.txt
       #- name: Install QC depedencies
       #  run: pip install -r requirements_qc.txt
+      - name: Install coverage
+        run: pip install coverage
       - name: Test
         run: |
           coverage run -m pytest

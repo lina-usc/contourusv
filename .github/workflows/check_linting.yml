@@ -14,8 +14,12 @@ jobs:
       - name: Install dependencies
         run: pip install .
       # Run Ruff
+      - name: Install Ruff
+        run: pip install ruff      
       - name: Run Ruff
         run: ruff check contourusv
       # Run Codespell
+      - name: Install Codespell
+        run: pip install codespell      
       - name: Run Codespell
         run: codespell contourusv
