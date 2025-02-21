@@ -1,0 +1,18 @@
+repos:
+  # Ruff linter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.0.286
+    hooks:
+      - id: ruff
+        name: ruff
+        files: ^contourusv/
+
+  # Codespell
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.5
+    hooks:
+      - id: codespell
+        additional_dependencies:
+          - tomli
+        files: ^contourusv/|^docs/
+        types_or: [python, bib, rst, inc]
