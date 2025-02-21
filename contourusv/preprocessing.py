@@ -11,10 +11,10 @@ from scipy import ndimage
 from PIL import Image as im
 import seaborn as sns
 
-def clean_spec(plt_dat):
+def clean_spec(Sxx):
 
     # Apply median filter
-    filtered_data = ndimage.median_filter(plt_dat, 3)
+    filtered_data = ndimage.median_filter(Sxx, 3)
 
     # Normalize data for thresholding (0-255)
     norm_image = cv2.normalize(

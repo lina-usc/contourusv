@@ -11,7 +11,7 @@ from scipy import ndimage
 from PIL import Image as im
 import seaborn as sns
 
-def detect_contours(cleaned_image, start_time, end_time, file_name):
+def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, file_name, annotations):
 
     # Re-apply Otsu's Thresholding
     ret, thresholded_image = cv2.threshold(
@@ -21,7 +21,6 @@ def detect_contours(cleaned_image, start_time, end_time, file_name):
         thresholded_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Initialize a list to hold the details of each detected USV
-    annotations = []
     usv_details = []
 
     # Process each contour
@@ -32,18 +31,18 @@ def detect_contours(cleaned_image, start_time, end_time, file_name):
         duration_end = start_time + \
             ((x + w) /
                 thresholded_image.shape[1]) * (end_time - start_time)
-        freq_start = 120000 - \
-            ((y + h) / thresholded_image.shape[0]) * (120000 - 15000)
-        freq_end = 120000 - \
-            (y / thresholded_image.shape[0]) * (120000 - 15000)
+        freq_start = freq_min + \
+            (y / thresholded_image.shape[0]) * (freq_max - freq_min)
+        freq_end = freq_min + \
+            ((y + h) / thresholded_image.shape[0]) * (freq_max - freq_min)
 
         duration = duration_end - duration_start
         # Frequency span
         freq_span = freq_end - freq_start
-
+        
         # For 22 kHz USVs
-        if freq_start > 15000 and freq_end < 35000:
-            if duration > 0.3 and duration < 3.0:
+        if freq_start > 15 and freq_end < 45 and freq_span < 10:
+            if duration > 0.03 and duration < 3.0:
                 usv_details.append({
                     'bounding_box': (x, y, w, h),
                     'duration': (x, x + w),
@@ -64,7 +63,7 @@ def detect_contours(cleaned_image, start_time, end_time, file_name):
                 })
 
         # For 50 kHz USVs
-        if freq_start > 15000 and freq_end < 80000:
+        if freq_start > 40 and freq_end < 80 and freq_span < 10:
             if duration > 0.01 and duration < 0.3:
                 usv_details.append({
                     'bounding_box': (x, y, w, h),
@@ -90,7 +89,7 @@ def detect_contours(cleaned_image, start_time, end_time, file_name):
     for usv in usv_details:
         x, y, w, h = usv['bounding_box']
         cv2.rectangle(image_with_annotations, (x, y),
-                        (x + w, y + h), (0, 255, 0), 2)
+                        (x + w, y + h), (0, 255, 0), 1)
 
     final_image = cv2.cvtColor(
         image_with_annotations, cv2.COLOR_BGR2RGB)
