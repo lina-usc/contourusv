@@ -77,7 +77,8 @@ def load_csv_usv(file_name):
         Processed annotations with columns:
         ['begin_time', 'end_time']
     """
-    data = pd.read_csv(file_name, header=None, names=['begin_time', 'end_time'], usecols=[0, 1])
+    data = pd.read_csv(file_name, header=None, names=['begin_time', 'end_time'],
+                       usecols=[0, 1])
     data['begin_time'] = data['begin_time'].astype(float)
     data['end_time'] = data['end_time'].astype(float)
     return data
@@ -160,12 +161,8 @@ def generate_annotations(experiment, trial, root_path, file_ext):
     output_path = Path(f'{root_path}/output/{experiment}/{trial}/ground_truth_annotations')
     output_path.mkdir(parents=True, exist_ok=True)
 
-    if file_ext == '.html':
-        html_files = sorted(list(files_path.rglob("*.html")))
-    elif file_ext == '.xlsx':
-        xlsx_files = sorted(list(files_path.rglob("*.xlsx")))
-    elif file_ext == '.csv':
-        csv_files = sorted(list(files_path.rglob("*.csv")))
+    if file_ext in ['.html', '.xlsx', '.csv']:
+        files = sorted(list(files_path.rglob(f"*{file_ext}")))
     else:
         raise ValueError("Invalid file extension. Please use html, xlsx, or csv.")
 
@@ -175,17 +172,6 @@ def generate_annotations(experiment, trial, root_path, file_ext):
         # Match files
         stem_parts = audio_file.stem.split('_')[0:3]
 
-        if file_ext == '.html':
-            matched_html = [f for f in html_files if f.stem.split('_')[0:3] == stem_parts]
-            if matched_html:
-                save_annotations(matched_html, audio_file, output_path, file_ext)
-        elif file_ext == '.xlsx':
-            matched_xlsx = [f for f in xlsx_files if f.stem.split('_')[0:3] == stem_parts]
-            if matched_xlsx:
-                save_annotations(matched_xlsx, audio_file, output_path, file_ext)
-        elif file_ext == '.csv':
-            matched_csv = [f for f in csv_files if f.stem.split('_')[0:3] == stem_parts]
-            if matched_csv:
-                save_annotations(matched_csv, audio_file, output_path, file_ext)
-        else:
-            raise ValueError("Invalid file extension. Please use html, xlsx, or csv.")
+        matched = [f for f in files if f.stem.split('_')[0:3] == stem_parts]
+        if matched:
+            save_annotations(matched, audio_file, output_path, file_ext)

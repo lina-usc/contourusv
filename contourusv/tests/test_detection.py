@@ -1,4 +1,4 @@
-from contourusv import detect_contours
+#from contourusv import detect_contours
 
 
 def test_detect_contour():

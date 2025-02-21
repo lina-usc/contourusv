@@ -14,11 +14,11 @@ def get_usvseg(file_stem=None):
     if file_stem is None:
         # dowload all files
         # TODO
+        pass
     else:
         url = f"https://zenodo.org/records/3428024/files/{file_stem}.zip?download=1"
         dataset_path = (Path(__file__).parent / "dataset" / "usvseg")
         dataset_path.mkdir(parents=True, exist_ok=True)
 
-        urllib.request.urlretrieve(url, dataset_path / f"filestem.zip")
+        urllib.request.urlretrieve(url, dataset_path / "filestem.zip")
         # TODO: unzip...
-
