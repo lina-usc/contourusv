@@ -210,7 +210,7 @@ if __name__ == "__main__":
     audio_files = sorted(list(files_path.rglob(
         "*.wav")) + list(files_path.rglob("*.WAV")))
 
-    # Measure the time and energy taken to execute the pipeline
+    # # Measure the time and energy taken to execute the pipeline
     start_time = time.time()
     tracker = EmissionsTracker(output_dir=output_path)
     tracker.start()
@@ -220,10 +220,10 @@ if __name__ == "__main__":
         run_detection(root_path, audio_file, experiment, trial, **ac_kwargs)
     
     # Generate ground truth annotations
-    generate_annotations(experiment, trial, root_path, file_ext)
+    # generate_annotations(experiment, trial, root_path, file_ext)
 
     # Run evaluation
-    run_evaluation(experiment, trial, root_path)
+    # run_evaluation(experiment, trial, root_path)
 
     end_time = time.time()
     total_time = end_time - start_time
