@@ -26,8 +26,17 @@ def clean_spec(Sxx):
         Preprocessed binary image (2D uint8 array)
     """
 
+    # data = Sxx.reshape(-1, 1)  # Reshape to (n_samples, 1)
+
+    # data = np.maximum(data, 0)  # Remove negative values
+
+    # model = NMF(n_components='auto', init='random', random_state=0)
+    # Sxx = model.fit_transform(data)  # Basis matrix
+    # H = model.components_  # Activation matrix
     # Apply median filter
     filtered_data = ndimage.median_filter(Sxx, 3)
+
+
 
     # blurred_data = cv2.GaussianBlur(filtered_data, (5, 5), 0)
 
@@ -36,8 +45,13 @@ def clean_spec(Sxx):
         filtered_data, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
     # Otsu's Thresholding
-    ret, thresh_img = cv2.threshold(
-        norm_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    thresh_img = cv2.adaptiveThreshold(
+        norm_image, 255, 
+        cv2.ADAPTIVE_THRESH_MEAN_C, 
+        cv2.THRESH_BINARY_INV, 
+        33, 2
+    )
+
 
     # Enhance Contrast
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
