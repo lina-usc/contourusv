@@ -41,6 +41,7 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
                     "freq_span_max": 10, 
                     "duration_min": 0.01,
                     "duration_max": 0.3},         
+
          }
 
     # Re-apply Otsu's Thresholding

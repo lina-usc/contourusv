@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 from scipy import ndimage
-
+from sklearn.decomposition import NMF
+import librosa
 
 def clean_spec(Sxx):
     """
@@ -24,6 +25,7 @@ def clean_spec(Sxx):
     ndarray
         Preprocessed binary image (2D uint8 array)
     """
+
     # Apply median filter
     filtered_data = ndimage.median_filter(Sxx, 3)
 

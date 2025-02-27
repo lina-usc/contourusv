@@ -8,6 +8,7 @@ from scipy.io import wavfile
 import matplotlib.pyplot as plt
 from codecarbon import EmissionsTracker
 from scipy.signal import spectrogram, butter, filtfilt
+from sklearn.decomposition import NMF
 
 from preprocessing import clean_spec
 from evaluation import run_evaluation
@@ -82,6 +83,14 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
     # # Apply low-pass filter
     data = low_pass_filter(data, cutoff=120000, fs=sfreq)
 
+    data = data.reshape(-1, 1)  # Reshape to (n_samples, 1)
+
+    data = np.maximum(data, 0)  # Remove negative values
+
+    model = NMF(n_components=2, init='random', random_state=0)
+    data = model.fit_transform(data)  # Basis matrix
+    H = model.components_  # Activation matrix
+
     # Normalize the audio data
     data = data / np.max(np.abs(data))
 
@@ -107,7 +116,7 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         #Define spectrogram parameters
         window = 'hann'
         nperseg = 512
-        noverlap = int(0.75 * nperseg)
+        noverlap = 1
         nfft = 512
         scaling = 'density'
         mode = 'magnitude'
@@ -144,20 +153,20 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
             bbox_inches='tight', pad_inches=0, dpi=300)
         plt.close()
 
-    # Save annotations to a DataFrame for the current audio file
-    df = pd.DataFrame(annotations)
-    df = df.sort_values('begin_time')
-    # Convert the numerical columns to 0.2f precision
-    df = df.round(2)
-    # Filter duplicate annotations based on the begin_time and end_time columns
-    df = df.drop_duplicates(
-        subset=['begin_time', 'end_time'], keep='first')
+    # # Save annotations to a DataFrame for the current audio file
+    # df = pd.DataFrame(annotations)
+    # df = df.sort_values('begin_time')
+    # # Convert the numerical columns to 0.2f precision
+    # df = df.round(2)
+    # # Filter duplicate annotations based on the begin_time and end_time columns
+    # df = df.drop_duplicates(
+    #     subset=['begin_time', 'end_time'], keep='first')
 
-    output_annotation_file = f'{root_path}/output/{experiment}/{trial}/contour_detections/{audio_file.stem}.csv'
-    Path(output_annotation_file).parent.mkdir(
-        parents=True, exist_ok=True)
-    df.to_csv(output_annotation_file, sep='\t', index=False)
-    print(f'Saved annotations to {output_annotation_file}')
+    # output_annotation_file = f'{root_path}/output/{experiment}/{trial}/contour_detections/{audio_file.stem}.csv'
+    # Path(output_annotation_file).parent.mkdir(
+    #     parents=True, exist_ok=True)
+    # df.to_csv(output_annotation_file, sep='\t', index=False)
+    # print(f'Saved annotations to {output_annotation_file}')
 
 if __name__ == "__main__":
     """
@@ -219,8 +228,8 @@ if __name__ == "__main__":
     for audio_file in tqdm(audio_files, desc=f"Running Detection on audio files for {experiment} {trial}"):
         run_detection(root_path, audio_file, experiment, trial, **ac_kwargs)
     
-    # Generate ground truth annotations
-    generate_annotations(experiment, trial, root_path, file_ext)
+    # # Generate ground truth annotations
+    # generate_annotations(experiment, trial, root_path, file_ext)
 
     # Run evaluation
     # run_evaluation(experiment, trial, root_path)
