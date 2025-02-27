@@ -49,7 +49,7 @@ def clean_spec(Sxx):
         norm_image, 255, 
         cv2.ADAPTIVE_THRESH_MEAN_C, 
         cv2.THRESH_BINARY_INV, 
-        33, 2
+        25, 21
     )
 
 
