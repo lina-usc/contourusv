@@ -28,11 +28,10 @@ def clean_spec(Sxx):
 
     # data = Sxx.reshape(-1, 1)  # Reshape to (n_samples, 1)
 
-    # data = np.maximum(data, 0)  # Remove negative values
-
     # model = NMF(n_components='auto', init='random', random_state=0)
     # Sxx = model.fit_transform(data)  # Basis matrix
     # H = model.components_  # Activation matrix
+
     # Apply median filter
     filtered_data = ndimage.median_filter(Sxx, 3)
 
@@ -44,7 +43,7 @@ def clean_spec(Sxx):
     norm_image = cv2.normalize(
         filtered_data, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
-    # Otsu's Thresholding
+    # Adaptive Thresholding
     thresh_img = cv2.adaptiveThreshold(
         norm_image, 255, 
         cv2.ADAPTIVE_THRESH_MEAN_C, 

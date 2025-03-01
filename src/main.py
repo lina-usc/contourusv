@@ -116,8 +116,12 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         # Compute spectrogram
         f, t, Sxx = spectrogram(data_segment, fs=sfreq, window=window, nperseg=nperseg,
                                 noverlap=noverlap, nfft=nfft, scaling=scaling, mode=mode)
+        
+        print(np.min(Sxx))
 
         Sxx = 10 * np.log10(Sxx + 1e-10)
+
+        # Positive only: Sxx = 10 * np.log10(Sxx + np.min(Sxx) + 10)
 
         # Convert frequencies to kHz
         f = f / 1000
