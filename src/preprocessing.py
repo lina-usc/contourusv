@@ -4,9 +4,64 @@ from scipy import ndimage
 from sklearn.decomposition import NMF
 import librosa
 
-def clean_spec(Sxx):
+def clean_spec_imp(Sxx):
     """
-    Preprocess spectrogram data for USV detection.
+    Improved preprocessing of spectrogram data for USV detection, using adaptive theshholding. 
+
+    Parameters
+    ----------
+    Sxx : ndarray
+        Input spectrogram (2D array in dB scale)
+
+    Returns
+    -------
+    ndarray
+        Preprocessed binary image (2D uint8 array)
+    """
+
+    # Apply mild median filter to reduce noise while keeping signals
+    filtered_data = ndimage.median_filter(Sxx, size=3)
+
+    # Normalize to range (0-255)
+    norm_image = cv2.normalize(filtered_data, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
+    # CLAHE contrast enhancement with slightly reduced contrast
+    clahe = cv2.createCLAHE(clipLimit=1.2, tileGridSize=(8, 8))
+    enhanced_img = clahe.apply(norm_image)
+
+    # Otsu’s thresholding
+    _, otsu_img = cv2.threshold(enhanced_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # Adaptive Thresholding (Fine-tuned parameters)
+    adaptive_img = cv2.adaptiveThreshold(
+        enhanced_img, 255, 
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+        cv2.THRESH_BINARY_INV, 
+        15, 15
+    )
+
+    # best results so far, 15, 15
+
+    # Morphological processing to connect weakly detected signals
+    # kernel = np.ones((5, 5), np.uint8)  # Moderate kernel size
+
+    # Mild dilation (reduced strength)
+    # dilated_img = cv2.dilate(blurred_img, kernel, iterations=1)
+
+    # Closing operation to connect broken USV structures
+    # closed_img = cv2.morphologyEx(binary_img, cv2.MORPH_CLOSE, kernel)
+
+    # **NEW:** Opening operation to remove small false positives
+    # final_img = cv2.morphologyEx(closed_img, cv2.MORPH_OPEN, kernel)
+
+    return adaptive_img
+
+
+
+
+def clean_spec_orig(Sxx):
+    """
+    Preprocess spectrogram data for USV detection using Otsu's threshholding and CLAHE contrast enhancement.
 
     Processing steps:
     1. Median filtering
@@ -25,32 +80,16 @@ def clean_spec(Sxx):
     ndarray
         Preprocessed binary image (2D uint8 array)
     """
-
-    # data = Sxx.reshape(-1, 1)  # Reshape to (n_samples, 1)
-
-    # model = NMF(n_components='auto', init='random', random_state=0)
-    # Sxx = model.fit_transform(data)  # Basis matrix
-    # H = model.components_  # Activation matrix
-
     # Apply median filter
     filtered_data = ndimage.median_filter(Sxx, 3)
-
-
-
-    # blurred_data = cv2.GaussianBlur(filtered_data, (5, 5), 0)
 
     # Normalize data for thresholding (0-255)
     norm_image = cv2.normalize(
         filtered_data, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
-    # Adaptive Thresholding
-    thresh_img = cv2.adaptiveThreshold(
-        norm_image, 255, 
-        cv2.ADAPTIVE_THRESH_MEAN_C, 
-        cv2.THRESH_BINARY_INV, 
-        25, 21
-    )
-
+    # Otsu's Thresholding
+    ret, thresh_img = cv2.threshold(
+        norm_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     # Enhance Contrast
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))

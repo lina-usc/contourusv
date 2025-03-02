@@ -9,8 +9,7 @@ import matplotlib.pyplot as plt
 from codecarbon import EmissionsTracker
 from scipy.signal import spectrogram, butter, filtfilt
 from sklearn.decomposition import NMF
-
-from preprocessing import clean_spec
+from preprocessing import *
 from evaluation import run_evaluation
 from detection import detect_contours
 from generate_annotation import generate_annotations
@@ -43,7 +42,7 @@ def low_pass_filter(data, cutoff, fs, order=5):
 
 
 def run_detection(root_path, file_name, experiment, trial, overlap=3,
-                  winlen=10, freq_min=15, freq_max=115, wsize=2500, th_perc=95):
+                  winlen=10, freq_min=15, freq_max=115, wsize=2500, th_perc=95, processing='adaptive'):
     """
     Process audio file to detect ultrasonic vocalizations (USVs).
 
@@ -69,6 +68,8 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         Spectrogram window size (default: 2500)
     th_perc : float, optional
         Percentile threshold for noise reduction (default: 95)
+    processing : str, optional
+        Type of preprocessing to apply Otsu/Adaptive(default: 'adaptive')
 
     Returns
     -------
@@ -130,7 +131,11 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         noise_floor = np.percentile(Sxx, th_perc)
         Sxx[Sxx < noise_floor] = noise_floor
 
-        cleaned_image = clean_spec(Sxx)
+        if(processing == 'Otsu'):
+            cleaned_image = clean_spec_orig(Sxx)
+        else:
+            cleaned_image = clean_spec_imp(Sxx)
+        cleaned_image = clean_spec_orig(Sxx)
         final_image, annotations = detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, file_name, annotations)
 
         output_dir = Path(
@@ -151,7 +156,7 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
 
     # Save annotations to a DataFrame for the current audio file
     df = pd.DataFrame(annotations)
-    # df = df.sort_values('begin_time')
+    df = df.sort_values('begin_time')
     # Convert the numerical columns to 0.2f precision
     df = df.round(2)
     # Filter duplicate annotations based on the begin_time and end_time columns

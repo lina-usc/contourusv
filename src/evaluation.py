@@ -3,6 +3,19 @@ import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
 from scipy.io import wavfile
+import time
+import argparse
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+from pathlib import Path
+from scipy.io import wavfile
+from codecarbon import EmissionsTracker
+from preprocessing import *
+from evaluation import run_evaluation
+from generate_annotation import generate_annotations
+from main import run_detection
+
 
 def has_columns(file_path, delimiter=','):
     with open(file_path, 'r') as f:
@@ -237,3 +250,84 @@ def run_evaluation(experiment, trial, root_path):
         f'{results_dir}/Evaluation_ContourUSV_{experiment}_{trial}_Ground_Truth_Annotations.csv', sep='\t', index=False)
     print(
         f"Saved evaluation results to {results_dir}/Evaluation_ContourUSV_{experiment}_{trial}_Ground_Truth_Annotations.csv")
+
+
+# TODO: Finish evalpreprp function
+# Needs:
+# - Argument parsing
+# - Run using both adaptive and otsu preprocessing
+# - Generate annotations for both adaptive and otsu preprocessing
+# - Run evaluation for both adaptive and otsu preprocessing
+# - Print results and compare the two preprocessing methods
+def eval_prepro():
+    """
+
+    """
+    parser = argparse.ArgumentParser(description="USV Detection Pipeline")
+    parser.add_argument("--root_path", type=str, default="/Users/username/data",
+                        help="Root path to the experiment data", required=True)
+    parser.add_argument("--experiment", type=str, default="PTSD16", help="Experiment name")
+    parser.add_argument("--trial", type=str, default="ACQ", help="trial name")
+    parser.add_argument("--overlap", type=int, default=3, help="Overlap duration")
+    parser.add_argument("--winlen", type=int, default=10, help="Window length")
+    parser.add_argument("--freq_min", type=int, default=15, help="Minimum frequency")
+    parser.add_argument("--freq_max", type=int, default=115, help="Maximum frequency")
+    parser.add_argument("--wsize", type=int, default=2500, help="Window size")
+    parser.add_argument("--th_perc", type=float, default=95, help="Threshold percentage")
+    parser.add_argument("--file_ext", type=str, default='.html', required= True, help="File extension to process (.html, .xlsx, .csv)")
+
+    args = parser.parse_args()
+
+    root_path = Path(args.root_path)
+    experiment = args.experiment
+    trial = args.trial
+    file_ext = args.file_ext
+
+    ac_kwargs = {
+        "overlap": args.overlap,
+        "winlen": args.winlen,
+        "freq_min": args.freq_min,
+        "freq_max": args.freq_max,
+        "wsize": args.wsize,
+        "th_perc": args.th_perc
+    }
+
+    files_path = Path(root_path) / experiment / trial
+    output_path = Path(
+        f'{root_path}/output/{experiment}/{trial}')
+    Path(output_path).mkdir(parents=True, exist_ok=True)
+
+    audio_files = sorted(list(files_path.rglob(
+        "*.wav")) + list(files_path.rglob("*.WAV")))
+
+    # Measure the time and energy taken to execute the pipeline
+    start_time = time.time()
+    tracker = EmissionsTracker(output_dir=output_path)
+    tracker.start()
+
+    # Run detection for each audio file
+    for audio_file in tqdm(audio_files, desc=f"Running Detection on audio files for {experiment} {trial}"):
+        run_detection(root_path, audio_file, experiment, trial, **ac_kwargs, processing = "adaptive")
+    
+    # Generate ground truth annotations
+    generate_annotations(experiment, trial, root_path, file_ext)
+
+    # Run evaluation
+    run_evaluation(experiment, trial, root_path)
+
+    end_time = time.time()
+    total_time = end_time - start_time
+
+    emissions: float = tracker.stop()
+    total_energy = tracker.final_emissions_data.energy_consumed
+
+    print(f"ContourUSV Detection Pipeline Executed for {experiment} {trial}")
+    print("---------------------------------------------------")
+    print(f"ContourUSV_Execution_Time_(s) = {total_time:.3f}")
+    print(f"ContourUSV_Carbon_Emissions_(kgCO2) = {emissions:.3f}")
+    print(f"ContourUSV_Total_Energy_Consumed_(kWh) = {total_energy:.3f}")
+
+if __name__ == "__main__":
+
+    # Evaluate the pipeline
+    eval_prepro()
