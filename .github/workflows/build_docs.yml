@@ -38,5 +38,26 @@ jobs:
 
     - name: Build the documentation
       run: |
-        sphinx-apidoc -o docs/ src/     
-        sphinx-build -b html docs/ pages/
+        # Generate reStructuredText files from the source code
+        sphinx-apidoc -o sphinx/ contourusv/ -f
+
+        rm -rf docs/
+          
+        # Ensure the docs directory exists
+        mkdir -p docs
+
+        # Build the HTML documentation
+        sphinx-build -b html sphinx/ docs/
+        pwd
+
+        # Add a .nojekyll file to bypass Jekyll processing on GitHub Pages
+        touch ./docs/.nojekyll
+
+    - name: Commit and push generated docs
+      run: |
+        git config --global user.email "dw42@email.sc.edu"  # Replace with your email
+        git config --global user.name "Dallas Wade"  # Replace with your name
+        git add docs/ -f
+        git commit -m "Add generated Sphinx documentation"
+        git push origin 2-add-continuous-integration 
+        
