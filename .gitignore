@@ -1,5 +1,5 @@
-src/__pycache__
+contourusv/__pycache__
 venv
 docs/
-src/output/
-src/Tests/
+contourusv/output/
+contourusv/Experiments/

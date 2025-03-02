@@ -12,7 +12,6 @@ from pathlib import Path
 from scipy.io import wavfile
 from codecarbon import EmissionsTracker
 from preprocessing import *
-from evaluation import run_evaluation
 from generate_annotation import generate_annotations
 from main import run_detection
 
