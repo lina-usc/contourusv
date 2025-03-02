@@ -37,7 +37,7 @@ jobs:
     - name: Build the documentation
       run: |
         # Generate reStructuredText files from the source code
-        sphinx-apidoc -o sphinx/ src/ -f
+        sphinx-apidoc -o sphinx/ contourusv/ -f
         rm -rf docs/
           
         # Ensure the docs directory exists
