@@ -4,14 +4,13 @@ on:
     push:
         branches:
         - main
-        - 2-add-continuous-integration
     pull_request:
         branches:
         - 2-add-continuous-integration
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # You can also use `windows-latest` or `macos-latest` if needed
 
     steps:
     - name: Checkout repository
@@ -20,9 +19,9 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: '3.10'  # Set your preferred Python version
 
-    - name: Add contoursuv to PYTHONPATH
+    - name: Add src to PYTHONPATH
       run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/contourusv" >> $GITHUB_ENV
 
     - name: Install dependencies
@@ -59,5 +58,4 @@ jobs:
         git config --global user.name "Dallas Wade"  # Replace with your name
         git add docs/ -f
         git commit -m "Add generated Sphinx documentation"
-        git push origin 2-add-continuous-integration 
-        
+        git push origin main
