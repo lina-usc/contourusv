@@ -21,7 +21,8 @@ def load_annotation(predicted_labels, actual_labels):
     return predicted_labels, actual_labels
 
 
-def evaluate_predictions(filename, sample_labels, predicted_sample_labels, total_samples):
+def evaluate_predictions(filename, sample_labels, predicted_sample_labels,
+                         total_samples):
     """
     Calculate evaluation metrics for USV predictions.
 
@@ -40,7 +41,8 @@ def evaluate_predictions(filename, sample_labels, predicted_sample_labels, total
     -------
     dict
         Evaluation metrics dictionary with keys:
-        ['Filename', 'TP', 'FP', 'TN', 'FN', 'Precision', 'Recall', 'F1 Score', 'Specificity']
+        ['Filename', 'TP', 'FP', 'TN', 'FN', 'Precision',
+         'Recall', 'F1 Score', 'Specificity']
     """
     # Calculate TP, FP, TN, FN
     tp = np.sum((sample_labels == 1) & (predicted_sample_labels == 1))
@@ -59,8 +61,8 @@ def evaluate_predictions(filename, sample_labels, predicted_sample_labels, total
     specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
 
     print(f"TP: {tp}, FP: {fp}, TN: {tn}, FN: {fn}")
-    print(
-        f"Precision: {precision}, Recall: {recall}, F1 Score: {f1_score}, Specificity: {specificity}")
+    print(f"Precision: {precision}, Recall: {recall}, "
+          f"F1 Score: {f1_score}, Specificity: {specificity}")
 
     return {"Filename": filename,
             "TP": tp,
@@ -123,7 +125,8 @@ def get_sample_labels(audio_file, actual_labels, predicted_labels):
                       (time_points < end_time)] = 1
 
     # Convert predicted time windows to sample indices
-    for window in tqdm(predicted_label_windows, desc="Converting predicted time windows to sample indices"):
+    desc="Converting predicted time windows to sample indices"
+    for window in tqdm(predicted_label_windows, desc=desc):
         start_time = window['begin_time']
         end_time = window['end_time']
         predicted_sample_labels[(time_points >= start_time) & (
@@ -234,6 +237,8 @@ def run_evaluation(experiment, trial, root_path):
     results_dir.mkdir(parents=True, exist_ok=True)
     # Save the DataFrame to a CSV file
     results_df.to_csv(
-        f'{results_dir}/Evaluation_ContourUSV_{experiment}_{trial}_Ground_Truth_Annotations.csv', sep='\t', index=False)
+        f'{results_dir}/Evaluation_ContourUSV_{experiment}_{trial}'
+        '_Ground_Truth_Annotations.csv', sep='\t', index=False)
     print(
-        f"Saved evaluation results to {results_dir}/Evaluation_ContourUSV_{experiment}_{trial}_Ground_Truth_Annotations.csv")
+        f"Saved evaluation results to {results_dir}/"
+        f"Evaluation_ContourUSV_{experiment}_{trial}_Ground_Truth_Annotations.csv")

@@ -89,7 +89,7 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
     total_time = len(data) / sfreq
 
     # Generate the time array
-    time = np.arange(len(data)) / sfreq
+    # time = np.arange(len(data)) / sfreq
 
     annotations = []  # Reset annotations for each audio file
 
@@ -113,8 +113,9 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         mode = 'magnitude'
 
         # Compute spectrogram
-        f, t, Sxx = spectrogram(data_segment, fs=sfreq, window=window, nperseg=nperseg,
-                                noverlap=noverlap, nfft=nfft, scaling=scaling, mode=mode)
+        f, t, Sxx = spectrogram(data_segment, fs=sfreq, window=window,
+                                nperseg=nperseg, noverlap=noverlap, nfft=nfft,
+                                scaling=scaling, mode=mode)
 
         Sxx = 10 * np.log10(Sxx + 1e-10)
 
@@ -126,7 +127,9 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         Sxx[Sxx < noise_floor] = noise_floor
 
         cleaned_image = clean_spec(Sxx)
-        final_image, annotations = detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, file_name, annotations)
+        final_image, annotations = detect_contours(cleaned_image, start_time,
+                                                   end_time, freq_min, freq_max,
+                                                   file_name, annotations)
 
         output_dir = Path(
             f'{root_path}/output/{experiment}/{trial}/spectrograms/{file_name.stem}')
@@ -139,8 +142,9 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
             start_time, end_time, 0, 120], origin='lower')
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Frequency (kHz)')
+        fname = Path(file_name).with_suffix('').name
         plt.savefig(
-            f"{output_dir}/{Path(file_name).with_suffix('').name}_{start_time}_{end_time}.png",
+            f"{output_dir}/{fname}_{start_time}_{end_time}.png",
             bbox_inches='tight', pad_inches=0, dpi=300)
         plt.close()
 
@@ -153,7 +157,8 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
     df = df.drop_duplicates(
         subset=['begin_time', 'end_time'], keep='first')
 
-    output_annotation_file = f'{root_path}/output/{experiment}/{trial}/contour_detections/{audio_file.stem}.csv'
+    output_annotation_file = f'{root_path}/output/{experiment}/{trial}'
+    output_annotation_file += f'/contour_detections/{audio_file.stem}.csv'
     Path(output_annotation_file).parent.mkdir(
         parents=True, exist_ok=True)
     df.to_csv(output_annotation_file, sep='\t', index=False)
@@ -176,15 +181,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="USV Detection Pipeline")
     parser.add_argument("--root_path", type=str, default="/Users/username/data",
                         help="Root path to the experiment data", required=True)
-    parser.add_argument("--experiment", type=str, default="PTSD16", help="Experiment name")
+    parser.add_argument("--experiment", type=str, default="PTSD16",
+                        help="Experiment name")
     parser.add_argument("--trial", type=str, default="ACQ", help="trial name")
     parser.add_argument("--overlap", type=int, default=3, help="Overlap duration")
     parser.add_argument("--winlen", type=int, default=10, help="Window length")
     parser.add_argument("--freq_min", type=int, default=15, help="Minimum frequency")
     parser.add_argument("--freq_max", type=int, default=115, help="Maximum frequency")
     parser.add_argument("--wsize", type=int, default=2500, help="Window size")
-    parser.add_argument("--th_perc", type=float, default=95, help="Threshold percentage")
-    parser.add_argument("--file_ext", type=str, default='.html', required= True, help="File extension to process (.html, .xlsx, .csv)")
+    parser.add_argument("--th_perc", type=float, default=95,
+                        help="Threshold percentage")
+    parser.add_argument("--file_ext", type=str, default='.html', required= True,
+                        help="File extension to process (.html, .xlsx, .csv)")
 
     args = parser.parse_args()
 
@@ -216,7 +224,8 @@ if __name__ == "__main__":
     tracker.start()
 
     # Run detection for each audio file
-    for audio_file in tqdm(audio_files, desc=f"Running Detection on audio files for {experiment} {trial}"):
+    desc=f"Running Detection on audio files for {experiment} {trial}"
+    for audio_file in tqdm(audio_files, desc=desc):
         run_detection(root_path, audio_file, experiment, trial, **ac_kwargs)
     
     # Generate ground truth annotations

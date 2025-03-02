@@ -1,0 +1,25 @@
+name: Style, Spellcheck, & Docstring
+
+on: pull_request
+
+jobs:
+  style:
+    name: Style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          python-version: "3.11"
+      - uses: pre-commit/action@v3.0.1
+      - name: Install dependencies
+        run: pip install .
+      # Run Ruff
+      - name: Install Ruff
+        run: pip install ruff      
+      - name: Run Ruff
+        run: ruff check contourusv
+      # Run Codespell
+      - name: Install Codespell
+        run: pip install codespell      
+      - name: Run Codespell
+        run: codespell contourusv

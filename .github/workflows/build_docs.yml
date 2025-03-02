@@ -4,13 +4,14 @@ on:
     push:
         branches:
         - main
+        - 2-add-continuous-integration
     pull_request:
         branches:
         - 2-add-continuous-integration
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # You can also use `windows-latest` or `macos-latest` if needed
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
@@ -19,15 +20,14 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'  # Set your preferred Python version
+        python-version: '3.10'
 
-    - name: Add src to PYTHONPATH
-      run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV 
-      # If you change code folder, you need to change this line /\, as well as "sphinx-apidoc"
+    - name: Add contoursuv to PYTHONPATH
+      run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/contourusv" >> $GITHUB_ENV
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip 
+        python -m pip install --upgrade pip
         pip install sphinx
         pip install sphinx_rtd_theme
         # Install missing dependencies
@@ -39,7 +39,7 @@ jobs:
     - name: Build the documentation
       run: |
         # Generate reStructuredText files from the source code
-        sphinx-apidoc -o sphinx/ src/ -f 
+        sphinx-apidoc -o sphinx/ contourusv/ -f
 
         rm -rf docs/
           
@@ -49,42 +49,14 @@ jobs:
         # Build the HTML documentation
         sphinx-build -b html sphinx/ docs/
         pwd
-        ls
 
         # Add a .nojekyll file to bypass Jekyll processing on GitHub Pages
         touch ./docs/.nojekyll
 
-        git config --global user.email "dw42@email.sc.edu"
-        git config --global user.name "Dallas Wade"
-
-        git add *
-        git commit -m "Adding docs"
-        git push origin main
-  
     - name: Commit and push generated docs
       run: |
-          ls
-          git config --global user.email "dw42@email.sc.edu"
-          git config --global user.name "Dallas Wade"
-          git config --global pull.rebase false  # Or true, or --ff-only based on your preference
-
-          # Ensure gh-pages branch exists and switch to it
-          git fetch origin gh-pages || git checkout --orphan gh-pages
-          git checkout gh-pages
-          git pull origin gh-pages --rebase  # Or --no-rebase based on your configuration
-
-          git checkout main -- docs/
-
-          git clean -fdx
-
-          # Commit and push only docs to gh-pages
-          git add docs/
-          git commit -m "Update Sphinx documentation"
-          git push origin gh-pages
-
-          # Switch back to main and remove docs from the main branch
-          git checkout main
-          rm -rf docs/
-          git add -A
-          git commit -m "Remove docs folder from main branch"
-          git push origin main
+        git config --global user.email "dw42@email.sc.edu"  # Replace with your email
+        git config --global user.name "Dallas Wade"  # Replace with your name
+        git add docs/ -f
+        git commit -m "Add generated Sphinx documentation"
+        git push origin main
