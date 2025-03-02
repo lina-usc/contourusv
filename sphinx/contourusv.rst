@@ -1,45 +1,45 @@
-src package
+contourusv package
 ===========
 
 Submodules
 ----------
 
-src.detection module
+contourusv.detection module
 --------------------
 
-.. automodule:: src.detection
+.. automodule:: contourusv.detection
    :members:
    :undoc-members:
    :show-inheritance:
 
-src.evaluation module
+contourusv.evaluation module
 ---------------------
 
-.. automodule:: src.evaluation
+.. automodule:: contourusv.evaluation
    :members:
    :undoc-members:
    :show-inheritance:
 
-src.generate\_annotation module
+contourusv.generate\_annotation module
 -------------------------------
 
-.. automodule:: src.generate_annotation
+.. automodule:: contourusv.generate_annotation
    :members:
    :undoc-members:
    :show-inheritance:
 
-src.main module
+contourusv.main module
 ---------------
 
-.. automodule:: src.main
+.. automodule:: contourusv.main
    :members:
    :undoc-members:
    :show-inheritance:
 
-src.preprocessing module
+contourusv.preprocessing module
 ------------------------
 
-.. automodule:: src.preprocessing
+.. automodule:: contourusv.preprocessing
    :members:
    :undoc-members:
    :show-inheritance:
@@ -47,7 +47,7 @@ src.preprocessing module
 Module contents
 ---------------
 
-.. automodule:: src
+.. automodule:: contourusv
    :members:
    :undoc-members:
    :show-inheritance:
