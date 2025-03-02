@@ -1,1 +1,5 @@
-src/__pycache__
+contourusv/__pycache__
+contourusv/Experiments
+contourusv/output
+venv
+.gitignore
