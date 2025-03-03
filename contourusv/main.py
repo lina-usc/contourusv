@@ -42,7 +42,7 @@ def low_pass_filter(data, cutoff, fs, order=5):
 
 
 def run_detection(root_path, file_name, experiment, trial, overlap=3,
-                  winlen=10, freq_min=15, freq_max=115, wsize=2500, th_perc=95, processing='adaptive'):
+                  winlen=10, freq_min=15, freq_max=115, wsize=2500, th_perc=95, processing='none'):
     """
     Process audio file to detect ultrasonic vocalizations (USVs).
 
@@ -131,11 +131,10 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         noise_floor = np.percentile(Sxx, th_perc)
         Sxx[Sxx < noise_floor] = noise_floor
 
-        if(processing == 'Otsu'):
+        if(processing == "Otsu"):
             cleaned_image = clean_spec_orig(Sxx)
         else:
             cleaned_image = clean_spec_imp(Sxx)
-        cleaned_image = clean_spec_orig(Sxx)
         final_image, annotations = detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, file_name, annotations)
 
         output_dir = Path(

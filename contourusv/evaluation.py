@@ -13,7 +13,6 @@ from scipy.io import wavfile
 from codecarbon import EmissionsTracker
 from preprocessing import *
 from generate_annotation import generate_annotations
-from main import run_detection
 
 
 def has_columns(file_path, delimiter=','):
@@ -307,6 +306,7 @@ def eval_prepro():
     # Run detection for each audio file
     for audio_file in tqdm(audio_files, desc=f"Running Detection on audio files for {experiment} {trial}"):
         run_detection(root_path, audio_file, experiment, trial, **ac_kwargs, processing = "adaptive")
+        run_detection(root_path, audio_file, experiment, trial, **ac_kwargs, processing = "otsu")
     
     # Generate ground truth annotations
     generate_annotations(experiment, trial, root_path, file_ext)
@@ -325,8 +325,3 @@ def eval_prepro():
     print(f"ContourUSV_Execution_Time_(s) = {total_time:.3f}")
     print(f"ContourUSV_Carbon_Emissions_(kgCO2) = {emissions:.3f}")
     print(f"ContourUSV_Total_Energy_Consumed_(kWh) = {total_energy:.3f}")
-
-if __name__ == "__main__":
-
-    # Evaluate the pipeline
-    eval_prepro()
