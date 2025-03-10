@@ -22,15 +22,14 @@ def clean_spec_imp(Sxx):
     # Apply mild median filter to reduce noise while keeping signals
     filtered_data = ndimage.median_filter(Sxx, size=3)
 
+    print("Filtered Data ", filtered_data)
+
     # Normalize to range (0-255)
     norm_image = cv2.normalize(filtered_data, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
     # CLAHE contrast enhancement with slightly reduced contrast
     clahe = cv2.createCLAHE(clipLimit=1.2, tileGridSize=(8, 8))
     enhanced_img = clahe.apply(norm_image)
-
-    # Otsu’s thresholding
-    _, otsu_img = cv2.threshold(enhanced_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     # Adaptive Thresholding (Fine-tuned parameters)
     adaptive_img = cv2.adaptiveThreshold(
@@ -41,18 +40,12 @@ def clean_spec_imp(Sxx):
     )
 
     # best results so far, 15, 15
+    # 15, 19 seems to do well
 
     # Morphological processing to connect weakly detected signals
-    # kernel = np.ones((5, 5), np.uint8)  # Moderate kernel size
+    # kernel = np.ones((1, 1), np.uint8)  # Moderate kernel size
 
-    # Mild dilation (reduced strength)
-    # dilated_img = cv2.dilate(blurred_img, kernel, iterations=1)
-
-    # Closing operation to connect broken USV structures
-    # closed_img = cv2.morphologyEx(binary_img, cv2.MORPH_CLOSE, kernel)
-
-    # **NEW:** Opening operation to remove small false positives
-    # final_img = cv2.morphologyEx(closed_img, cv2.MORPH_OPEN, kernel)
+    # final_img = cv2.morphologyEx(adaptive_img, cv2.MORPH_OPEN, kernel)
 
     return adaptive_img
 
