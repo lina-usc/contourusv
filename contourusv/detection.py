@@ -44,9 +44,10 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
 
          }
 
-    # Re-apply Otsu's Thresholding
-    ret, thresholded_image = cv2.threshold(
-        cleaned_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # # # Re-apply Otsu's Thresholding DOESNT HELP
+    # ret, thresholded_image = cv2.threshold(
+    #     cleaned_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    thresholded_image = cleaned_image
 
     contours, _ = cv2.findContours(
         thresholded_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)

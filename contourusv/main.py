@@ -38,6 +38,76 @@ def use_ICA(Sxx):
 
     return transformed_Sxx  # Transpose back to original shape
 
+def use_NMF_Small(Sxx, num_splits=120, n_components=25):
+    """
+    Perform Non-negative Matrix Factorization (NMF) on the input spectrogram 
+    by splitting it into parts and applying NMF with specified components on each.
+
+    Parameters:
+    -----------
+    Sxx : ndarray
+        Input spectrogram to process.
+    num_splits : int, optional
+        Number of segments to divide the spectrogram into (default: 80).
+    n_components : int, optional
+        Number of NMF components (default: 25).
+
+    Returns:
+    --------
+    ndarray
+        Transformed spectrogram after NMF.
+    """
+
+    # Print min and max values for debugging
+    print("Min/Max of Sxx:", np.min(Sxx), np.max(Sxx))
+
+    # Shift the spectrogram to make all values non-negative
+    min_value = np.min(Sxx)
+    if min_value < 0:
+        Sxx = Sxx - min_value  # Shift all values up to be non-negative
+
+    print("Shifted Min/Max of Sxx:", np.min(Sxx), np.max(Sxx))
+
+    # Determine split size
+    split_size = max(n_components, Sxx.shape[1] // num_splits)  # Ensure at least `n_components` columns
+
+    transformed_parts = []
+
+    for i in range(0, Sxx.shape[1], split_size):
+        end_idx = min(i + split_size, Sxx.shape[1])  # Avoid out-of-bounds
+        
+        Sxx_part = Sxx[:, i:end_idx]  # Extract segment
+        
+        # Pad small segments with zeros or mean value to ensure correct dimensions
+        if Sxx_part.shape[1] < n_components:
+            print(f"Padding segment {i}-{end_idx} to meet {n_components} components")
+            # Padding with zeros, but you could also use the mean of the column values
+            padding = np.zeros((Sxx_part.shape[0], n_components - Sxx_part.shape[1]))
+            Sxx_part = np.hstack((Sxx_part, padding))  # Add padding to the segment
+
+        # Use `nndsvd` if possible, otherwise fall back to `random`
+        init_method = 'nndsvd' if Sxx_part.shape[1] >= n_components else 'random'
+        if init_method == 'nndsvd':
+            max_iter = 100
+        else:
+            max_iter = 500
+        
+        # Apply NMF
+        model = NMF(n_components=n_components, init=init_method, random_state=0, max_iter = max_iter)
+        W = model.fit_transform(Sxx_part)
+        H = model.components_
+
+        # Reconstruct the matrix segment
+        reconstructed_Sxx_part = np.dot(W, H)
+
+        transformed_parts.append(reconstructed_Sxx_part)
+
+    # Concatenate along the time axis (columns)
+    reconstructed_Sxx = np.hstack(transformed_parts)
+
+    return reconstructed_Sxx
+
+
 def use_NMF(Sxx):
     """
     Perform Non-negative Matrix Factorization (NMF) on the input spectrogram.
@@ -69,7 +139,7 @@ def use_NMF(Sxx):
     # Minimal Change on C57
     # Performs poor on Mouse_B6PUP
     # Seems to take a long time to run
-    model = NMF(n_components=40, init='nndsvd', random_state=0, max_iter=100)
+    model = NMF(n_components=30, init='nndsvd', random_state=0, max_iter=100)
     W = model.fit_transform(Sxx)  # W is the transformed data (lower-dimensional)
     H = model.components_         # H is the components (basis)
 
@@ -196,7 +266,7 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         Sxx[Sxx < noise_floor] = noise_floor
 
         # Sxx = use_ICA(Sxx)
-        Sxx = use_NMF(Sxx)
+        Sxx = use_NMF_Small(Sxx)
 
         if(processing == "Otsu"):
             cleaned_image = clean_spec_orig(Sxx)
