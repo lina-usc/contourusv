@@ -13,6 +13,9 @@ from preprocessing import *
 from evaluation import run_evaluation
 from detection import detect_contours
 from generate_annotation import generate_annotations
+from sklearn.exceptions import ConvergenceWarning
+import warnings
+warnings.simplefilter("ignore", ConvergenceWarning)
 
 from sklearn.decomposition import FastICA
 
@@ -59,14 +62,12 @@ def use_NMF_Small(Sxx, num_splits=120, n_components=25):
     """
 
     # Print min and max values for debugging
-    print("Min/Max of Sxx:", np.min(Sxx), np.max(Sxx))
 
     # Shift the spectrogram to make all values non-negative
     min_value = np.min(Sxx)
     if min_value < 0:
         Sxx = Sxx - min_value  # Shift all values up to be non-negative
 
-    print("Shifted Min/Max of Sxx:", np.min(Sxx), np.max(Sxx))
 
     # Determine split size
     split_size = max(n_components, Sxx.shape[1] // num_splits)  # Ensure at least `n_components` columns
@@ -123,22 +124,18 @@ def use_NMF(Sxx):
         Transformed spectrogram after NMF.
     """
 
-    # Print min and max values for debugging
-    print("Min/Max of Sxx:", np.min(Sxx), np.max(Sxx))
-
     # Shift the spectrogram to make all values non-negative
     min_value = np.min(Sxx)
     if min_value < 0:
         Sxx = Sxx - min_value  # Shift all values up to be non-negative
-
-    print("Shifted Min/Max of Sxx:", np.min(Sxx), np.max(Sxx))
 
     # Apply NMF 
     # Notes: 
     # Performs well on Gerbil, MP
     # Minimal Change on C57
     # Performs poor on Mouse_B6PUP
-    # Seems to take a long time to run
+    # Seems to take a long time to runimport warnings
+
     model = NMF(n_components=30, init='nndsvd', random_state=0, max_iter=100)
     W = model.fit_transform(Sxx)  # W is the transformed data (lower-dimensional)
     H = model.components_         # H is the components (basis)
@@ -256,8 +253,6 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         
         Sxx = 10 * np.log10(Sxx + 1e-10)
 
-        print(np.max(Sxx))
-
         # Convert frequencies to kHz
         f = f / 1000
 
@@ -272,6 +267,7 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
             cleaned_image = clean_spec_orig(Sxx)
         else:
             cleaned_image = clean_spec_imp(Sxx)
+
         final_image, annotations = detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, file_name, annotations)
 
         output_dir = Path(

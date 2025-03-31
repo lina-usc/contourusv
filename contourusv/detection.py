@@ -34,7 +34,7 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
          "22kHz": {"freq_min": 15,
                     "freq_max": 45,
                     "freq_span_max": 10, 
-                    "duration_min": 0.03,
+                    "duration_min": 0.03,  # .03 was original
                     "duration_max": 3.0},
          "50kHz": {"freq_min": 40,
                     "freq_max": 80,

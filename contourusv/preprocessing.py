@@ -22,8 +22,6 @@ def clean_spec_imp(Sxx):
     # Apply mild median filter to reduce noise while keeping signals
     filtered_data = ndimage.median_filter(Sxx, size=3)
 
-    print("Filtered Data ", filtered_data)
-
     # Normalize to range (0-255)
     norm_image = cv2.normalize(filtered_data, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
