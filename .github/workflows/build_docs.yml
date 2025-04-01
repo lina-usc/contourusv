@@ -60,6 +60,10 @@ jobs:
           git config --global user.name "Dallas Wade"
           git config --global pull.rebase false  # Or true, or --ff-only based on your preference
 
+          git add sphinx/modules.rst
+          git commit -m "Updated modules.rst"
+
+
           # Ensure gh-pages branch exists and switch to it
           git fetch origin gh-pages || git checkout --orphan gh-pages
           git checkout gh-pages
