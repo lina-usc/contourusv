@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 from scipy import ndimage
 from sklearn.decomposition import NMF
-import librosa
 
 # Lists for PR:
 # 1. Combine preprocessing functions into a single function with a parameter to choose between them.
