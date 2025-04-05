@@ -64,15 +64,16 @@ jobs:
         git commit -m "Updated docs"
   
         # Ensure gh-pages branch exists and switch to it
-        git fetch origin gh-pages || git checkout --orphan gh-pages
+        git checkout --orphan gh-pages
         git checkout gh-pages
         git pull origin gh-pages --rebase
   
-        # Debugging: Check if docs/ exists and has content
-        ls -l docs/ || echo "docs/ folder missing!"
+        rm -rf docs/*
+
+        
         
         # Ensure docs/ is staged properly
-        git add docs/
+        git add *
         git status  # Debugging: See if anything is staged
         git commit -m "Update Sphinx documentation" || echo "No changes to commit."
   
