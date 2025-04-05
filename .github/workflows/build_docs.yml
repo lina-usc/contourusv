@@ -34,7 +34,7 @@ jobs:
         pip install tqdm scipy
         pip install matplotlib
         pip install codecarbon
-        pip install sklearn
+        pip install scikit-learn
 
     - name: Build the documentation
       run: |
