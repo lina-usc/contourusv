@@ -261,7 +261,7 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         Sxx[Sxx < noise_floor] = noise_floor
 
         # Sxx = use_ICA(Sxx)
-        # Sxx = use_NMF_Small(Sxx)
+        Sxx = use_NMF_Small(Sxx)
 
         if(processing == "Otsu"):
             cleaned_image = clean_spec_orig(Sxx)
