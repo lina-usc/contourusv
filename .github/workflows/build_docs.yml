@@ -66,12 +66,9 @@ jobs:
         # Ensure gh-pages branch exists and switch to it
         git checkout --orphan gh-pages
         git checkout gh-pages
-        git pull origin gh-pages --rebase
   
         rm -rf docs/*
 
-        
-        
         # Ensure docs/ is staged properly
         git add *
         git status  # Debugging: See if anything is staged
