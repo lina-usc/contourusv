@@ -32,6 +32,8 @@ jobs:
 
     - name: Build the documentation
       run: |
+
+        git checkout --orphan gh-pages
         # Generate reStructuredText files from the source code
         sphinx-apidoc -o sphinx/ contourusv/ -f
 
@@ -54,12 +56,6 @@ jobs:
         git config --global user.email "dw42@email.sc.edu"
         git config --global user.name "Dallas Wade"
         git config --global pull.rebase false  # Or true, or --ff-only based on your preference
-  
-        git add docs/
-        git commit -m "Updated docs"
-  
-        # Ensure gh-pages branch exists and switch to it
-        git checkout --orphan gh-pages
 
         # Ensure docs/ is staged properly
         git add docs/
@@ -68,11 +64,4 @@ jobs:
   
         # Push the changes
         git push origin gh-pages --force
-  
-        # Switch back to main and remove docs from the main branch
-        git checkout main
-        rm -rf docs/
-        git add -A
-        git commit -m "Remove docs folder from main branch" || echo "No changes to commit."
-        git push origin main
   
