@@ -4,6 +4,13 @@ from scipy import ndimage
 from sklearn.decomposition import NMF
 import librosa
 
+# Lists for PR:
+# 1. Combine preprocessing functions into a single function with a parameter to choose between them.
+# 2. Generate f1 score graph using sb, add to poster
+# 3. Fun tests on rat_pleasant using both methods
+# 4. Push PR to main repo
+# 5. Make sure ghpages is pushing correctly
+
 def clean_spec_imp(Sxx):
     """
     Improved preprocessing of spectrogram data for USV detection, using adaptive theshholding. 

@@ -261,7 +261,7 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         Sxx[Sxx < noise_floor] = noise_floor
 
         # Sxx = use_ICA(Sxx)
-        Sxx = use_NMF_Small(Sxx)
+        # Sxx = use_NMF_Small(Sxx)
 
         if(processing == "Otsu"):
             cleaned_image = clean_spec_orig(Sxx)
@@ -288,18 +288,20 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
 
     # Save annotations to a DataFrame for the current audio file
     df = pd.DataFrame(annotations)
-    df = df.sort_values('begin_time')
-    # Convert the numerical columns to 0.2f precision
-    df = df.round(2)
-    # Filter duplicate annotations based on the begin_time and end_time columns
-    df = df.drop_duplicates(
-        subset=['begin_time', 'end_time'], keep='first')
 
-    output_annotation_file = f'{root_path}/output/{experiment}/{trial}/contour_detections/{audio_file.stem}.csv'
-    Path(output_annotation_file).parent.mkdir(
-        parents=True, exist_ok=True)
-    df.to_csv(output_annotation_file, sep='\t', index=False)
-    print(f'Saved annotations to {output_annotation_file}')
+    # Proceed only if detections were made
+    if not df.empty:
+        df = df.sort_values('begin_time')
+        df = df.round(2)
+        df = df.drop_duplicates(subset=['begin_time', 'end_time'], keep='first')
+
+        output_annotation_file = f'{root_path}/output/{experiment}/{trial}/contour_detections/{audio_file.stem}.csv'
+        Path(output_annotation_file).parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(output_annotation_file, sep='\t', index=False)
+        print(f'Saved annotations to {output_annotation_file}')
+    else:
+        print(f'No USVs detected in {audio_file.name}, skipping CSV export.')
+
 
 if __name__ == "__main__":
     """
