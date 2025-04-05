@@ -74,7 +74,7 @@ jobs:
         git commit -m "Update Sphinx documentation" || echo "No changes to commit."
   
         # Push the changes
-        git push origin gh-pages
+        git push origin gh-pages --force
   
         # Switch back to main and remove docs from the main branch
         git checkout main
