@@ -65,8 +65,6 @@ jobs:
   
         # Ensure gh-pages branch exists and switch to it
         git checkout --orphan gh-pages
-  
-        rm -rf docs/*
 
         # Ensure docs/ is staged properly
         git add docs/
