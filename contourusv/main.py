@@ -261,7 +261,8 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         Sxx[Sxx < noise_floor] = noise_floor
 
         # Sxx = use_ICA(Sxx)
-        Sxx = use_NMF_Small(Sxx)
+        if (processing != "Otsu"):
+            Sxx = use_NMF_Small(Sxx)
 
         if(processing == "Otsu"):
             cleaned_image = clean_spec_orig(Sxx)
@@ -329,6 +330,7 @@ if __name__ == "__main__":
     parser.add_argument("--wsize", type=int, default=2500, help="Window size")
     parser.add_argument("--th_perc", type=float, default=95, help="Threshold percentage")
     parser.add_argument("--file_ext", type=str, default='.html', required= True, help="File extension to process (.html, .xlsx, .csv)")
+    parser.add_argument("--processing", type=str, default='adaptive', help="Processing method (Otsu/Adaptive)")
 
     args = parser.parse_args()
 
@@ -343,7 +345,8 @@ if __name__ == "__main__":
         "freq_min": args.freq_min,
         "freq_max": args.freq_max,
         "wsize": args.wsize,
-        "th_perc": args.th_perc
+        "th_perc": args.th_perc,
+        "processing": args.processing
     }
 
     files_path = Path(root_path) / experiment / trial
