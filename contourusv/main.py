@@ -269,7 +269,7 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         else:
             cleaned_image = clean_spec_imp(Sxx)
 
-        final_image, annotations = detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, file_name, annotations)
+        final_image, annotations = detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, file_name, annotations, processing=processing)
 
         output_dir = Path(
             f'{root_path}/output/{experiment}/{trial}/spectrograms/{file_name.stem}')
