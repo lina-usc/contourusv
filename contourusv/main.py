@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from codecarbon import EmissionsTracker
 from scipy.signal import spectrogram, butter, filtfilt
 from sklearn.decomposition import NMF, FastICA
-from preprocessing import *
+from preprocessing import clean_spec_imp, clean_spec_orig
 from evaluation import run_evaluation
 from detection import detect_contours
 from generate_annotation import generate_annotations
@@ -39,7 +39,7 @@ def use_ICA(Sxx):
     ica = FastICA(n_components=None, random_state=0)
     transformed_Sxx = ica.fit_transform(Sxx.T)  # Apply ICA transformation
 
-    return transformed_Sxx  # Transpose back to original shape
+    return transformed_Sxx
 
 def use_NMF_Small(Sxx, num_splits=120, n_components=25):
     """
@@ -143,7 +143,7 @@ def use_NMF(Sxx):
     # Optionally reconstruct the full matrix
     reconstructed_Sxx = np.dot(W, H)  # Reconstructed spectrogram (W * H)
 
-    return reconstructed_Sxx  # Return the reconstructed matrix (or W if you want the transformed one)
+    return reconstructed_Sxx
 
 
 
@@ -175,7 +175,7 @@ def low_pass_filter(data, cutoff, fs, order=5):
 
 
 def run_detection(root_path, file_name, experiment, trial, overlap=3,
-                  winlen=10, freq_min=15, freq_max=115, wsize=2500, th_perc=95, processing='none'):
+                  winlen=10, freq_min=15, freq_max=115, wsize=2500, th_perc=95, processing='none', overlapsize=.25):
     """
     Process audio file to detect ultrasonic vocalizations (USVs).
 
@@ -203,6 +203,8 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         Percentile threshold for noise reduction (default: 95)
     processing : str, optional
         Type of preprocessing to apply Otsu/Adaptive(default: 'adaptive')
+    overlapsize: int, optional
+        Defines size of overlap window as a percentage  (defailt: .25)
 
     Returns
     -------
@@ -242,7 +244,7 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         #Define spectrogram parameters
         window = 'hann'
         nperseg = 512
-        noverlap = int(nperseg * 0.25)
+        noverlap = int(nperseg * overlapsize)
         nfft = 512
         scaling = 'density'
         mode = 'magnitude'
