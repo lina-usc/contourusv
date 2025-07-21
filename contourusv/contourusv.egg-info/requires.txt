@@ -1,0 +1,10 @@
+numpy
+mne
+matplotlib
+scipy
+pandas
+opencv-python
+tqdm
+codecarbon
+seaborn
+pillow
