@@ -44,7 +44,8 @@ def use_ICA(Sxx):
 def use_NMF_Small(Sxx, num_splits=120, n_components=25):
     """
     Perform Non-negative Matrix Factorization (NMF) on the input spectrogram 
-    by splitting it into parts and applying NMF with specified components on each.
+    by splitting it into parts and applying NMF with specified components on each block.
+    This segmentation allows better capture of properties of the signal when it is non-stationary.
 
     Parameters:
     -----------
@@ -60,8 +61,6 @@ def use_NMF_Small(Sxx, num_splits=120, n_components=25):
     ndarray
         Transformed spectrogram after NMF.
     """
-
-    # Print min and max values for debugging
 
     # Shift the spectrogram to make all values non-negative
     min_value = np.min(Sxx)
@@ -82,7 +81,7 @@ def use_NMF_Small(Sxx, num_splits=120, n_components=25):
         # Pad small segments with zeros or mean value to ensure correct dimensions
         if Sxx_part.shape[1] < n_components:
             print(f"Padding segment {i}-{end_idx} to meet {n_components} components")
-            # Padding with zeros, but you could also use the mean of the column values
+            # Padding with zeros
             padding = np.zeros((Sxx_part.shape[0], n_components - Sxx_part.shape[1]))
             Sxx_part = np.hstack((Sxx_part, padding))  # Add padding to the segment
 
@@ -94,7 +93,9 @@ def use_NMF_Small(Sxx, num_splits=120, n_components=25):
             max_iter = 500
         
         # Apply NMF
-        model = NMF(n_components=n_components, init=init_method, random_state=0, max_iter = max_iter)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", ConvergenceWarning)
+            model = NMF(n_components=n_components, init=init_method, random_state=0, max_iter=max_iter)
         W = model.fit_transform(Sxx_part)
         H = model.components_
 
@@ -109,7 +110,7 @@ def use_NMF_Small(Sxx, num_splits=120, n_components=25):
     return reconstructed_Sxx
 
 
-def use_NMF(Sxx):
+def use_NMF(Sxx, n_components=30):
     """
     Perform Non-negative Matrix Factorization (NMF) on the input spectrogram.
 
@@ -117,6 +118,8 @@ def use_NMF(Sxx):
     -----------
     Sxx : ndarray
         Input spectrogram to process.
+    n_components : int
+        Components to split for NMF (default: 30)
 
     Returns:
     --------
@@ -135,12 +138,13 @@ def use_NMF(Sxx):
     # Minimal Change on C57
     # Performs poor on Mouse_B6PUP
     # Seems to take a long time to runimport warnings
+    # n = 30 determined by trial and error, 30 provided consistent highest results
 
-    model = NMF(n_components=30, init='nndsvd', random_state=0, max_iter=100)
+    model = NMF(n_components=n_components, init='nndsvd', random_state=0, max_iter=100)
     W = model.fit_transform(Sxx)  # W is the transformed data (lower-dimensional)
     H = model.components_         # H is the components (basis)
 
-    # Optionally reconstruct the full matrix
+    # Reconstruct the full matrix
     reconstructed_Sxx = np.dot(W, H)  # Reconstructed spectrogram (W * H)
 
     return reconstructed_Sxx
@@ -262,7 +266,6 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         noise_floor = np.percentile(Sxx, th_perc)
         Sxx[Sxx < noise_floor] = noise_floor
 
-        # Sxx = use_ICA(Sxx)
         if (processing != "Otsu"):
             Sxx = use_NMF_Small(Sxx)
 
