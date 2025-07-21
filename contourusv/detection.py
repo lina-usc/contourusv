@@ -1,7 +1,7 @@
 import cv2
 
 def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, 
-                                    file_name, annotations, call_type_defs=None):
+                                    file_name, annotations, call_type_defs=None, processing="adaptive"):
     """
     Detect and classify USVs in cleaned spectrogram images.
 
@@ -34,18 +34,22 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
          "22kHz": {"freq_min": 15,
                     "freq_max": 45,
                     "freq_span_max": 10, 
-                    "duration_min": 0.03,
+                    "duration_min": 0.03,  # .03 was original
                     "duration_max": 3.0},
          "50kHz": {"freq_min": 40,
                     "freq_max": 80,
                     "freq_span_max": 10, 
                     "duration_min": 0.01,
                     "duration_max": 0.3},         
+
          }
 
-    # Re-apply Otsu's Thresholding
-    ret, thresholded_image = cv2.threshold(
-        cleaned_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # Re-apply Otsu's Thresholding (Cant do if using adaptive)
+    if(processing == "Otsu"):
+        ret, thresholded_image = cv2.threshold(
+            cleaned_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    else:
+        thresholded_image = cleaned_image
 
     contours, _ = cv2.findContours(
         thresholded_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
