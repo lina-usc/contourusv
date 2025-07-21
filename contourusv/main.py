@@ -248,7 +248,7 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         #Define spectrogram parameters
         window = 'hann'
         nperseg = 512
-        noverlap = int(nperseg * overlapsize)
+        noverlap = int(nperseg * .25)
         nfft = 512
         scaling = 'density'
         mode = 'magnitude'
