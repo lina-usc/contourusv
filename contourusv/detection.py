@@ -72,7 +72,7 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
                       "duration_max": 0.3},
         }
 
-    # Re-apply Otsu's Thresholding (if requested)
+    # Re-apply Otsu's Thresholding if using Otsus
     if processing == "Otsu":
         ret, thresholded_image = cv2.threshold(
             cleaned_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -84,7 +84,7 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
 
     usv_details = []
 
-    # Process each contour (automatic detection)
+    # Process each contour
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
         duration_start = start_time + (x / thresholded_image.shape[1]) * (end_time - start_time)
@@ -140,7 +140,7 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
         ].reset_index(drop=True)
 
         for idx, row in manual_subset.iterrows():
-            # map times to x coordinates
+            # map times to x coordinates for markers
             x1 = int(((row["begin_time"] - start_time) / (end_time - start_time)) * thresholded_image.shape[1])
             x2 = int(((row["end_time"] - start_time) / (end_time - start_time)) * thresholded_image.shape[1])
             y1, y2 = 0, thresholded_image.shape[0]  # full height

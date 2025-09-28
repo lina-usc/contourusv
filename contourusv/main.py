@@ -80,14 +80,14 @@ def use_NMF_Small(Sxx, num_splits=120, n_components=25):
         
         Sxx_part = Sxx[:, i:end_idx]  # Extract segment
         
-        # Pad small segments with zeros or mean value to ensure correct dimensions
+        # Pad small segments with zeros to ensure correct dimensions
         if Sxx_part.shape[1] < n_components:
             print(f"Padding segment {i}-{end_idx} to meet {n_components} components")
             # Padding with zeros
             padding = np.zeros((Sxx_part.shape[0], n_components - Sxx_part.shape[1]))
             Sxx_part = np.hstack((Sxx_part, padding))  # Add padding to the segment
 
-        # Use `nndsvd` if possible, otherwise fall back to `random`
+        # Use `nndsvd` if possible, otherwise fall back to `random` This depends on number of components, might not be enough
         init_method = 'nndsvd' if Sxx_part.shape[1] >= n_components else 'random'
         if init_method == 'nndsvd':
             max_iter = 100
@@ -101,7 +101,7 @@ def use_NMF_Small(Sxx, num_splits=120, n_components=25):
         W = model.fit_transform(Sxx_part)
         H = model.components_
 
-        # Reconstruct the matrix segment
+        # Reconstruct an approximation the matrix segment
         reconstructed_Sxx_part = np.dot(W, H)
 
         transformed_parts.append(reconstructed_Sxx_part)
