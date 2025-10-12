@@ -47,9 +47,6 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
         Call type definitions
     processing : str
         Thresholding method ("adaptive" or "Otsu")
-    manual_annots : pd.DataFrame or None
-        Optional DataFrame of ground truth annotations with columns
-        ["begin_time", "end_time"]
 
     Returns
     -------
@@ -60,7 +57,7 @@ def detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max,
     """
     if call_type_defs is None:
         call_type_defs = {
-            "22kHz": {"freq_min": 25,
+            "22kHz": {"freq_min": 15, # 25kh works to eliminate false low call detections, but is incorrect logically
                       "freq_max": 45,
                       "freq_span_max": 10,
                       "duration_min": 0.03,

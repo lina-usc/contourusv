@@ -274,7 +274,10 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
 
 
         # Find index where frequency >= 40 kHz (f is in kHz)
-        split_idx = np.argmax(f >= 40)
+
+        split = 40
+
+        split_idx = np.argmax(f >= split)
 
         # Store original upper half from *raw* Sxx for later restoration
         Sxx_high_original = Sxx[split_idx:, :]
