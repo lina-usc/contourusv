@@ -8,6 +8,7 @@ from scipy.io import wavfile
 import matplotlib.pyplot as plt
 from codecarbon import EmissionsTracker
 from scipy.signal import spectrogram, butter, filtfilt
+from scipy import ndimage
 from sklearn.decomposition import NMF, FastICA
 from preprocessing import clean_spec_imp, clean_spec_orig
 from evaluation import run_evaluation
@@ -15,6 +16,7 @@ from detection import detect_contours
 from generate_annotation import generate_annotations
 from sklearn.exceptions import ConvergenceWarning
 import warnings
+import cv2
 warnings.simplefilter("ignore", ConvergenceWarning)
 
 from sklearn.decomposition import FastICA
@@ -78,14 +80,14 @@ def use_NMF_Small(Sxx, num_splits=120, n_components=25):
         
         Sxx_part = Sxx[:, i:end_idx]  # Extract segment
         
-        # Pad small segments with zeros or mean value to ensure correct dimensions
+        # Pad small segments with zeros to ensure correct dimensions
         if Sxx_part.shape[1] < n_components:
             print(f"Padding segment {i}-{end_idx} to meet {n_components} components")
             # Padding with zeros
             padding = np.zeros((Sxx_part.shape[0], n_components - Sxx_part.shape[1]))
             Sxx_part = np.hstack((Sxx_part, padding))  # Add padding to the segment
 
-        # Use `nndsvd` if possible, otherwise fall back to `random`
+        # Use `nndsvd` if possible, otherwise fall back to `random` This depends on number of components, might not be enough
         init_method = 'nndsvd' if Sxx_part.shape[1] >= n_components else 'random'
         if init_method == 'nndsvd':
             max_iter = 100
@@ -99,7 +101,7 @@ def use_NMF_Small(Sxx, num_splits=120, n_components=25):
         W = model.fit_transform(Sxx_part)
         H = model.components_
 
-        # Reconstruct the matrix segment
+        # Reconstruct an approximation the matrix segment
         reconstructed_Sxx_part = np.dot(W, H)
 
         transformed_parts.append(reconstructed_Sxx_part)
@@ -179,7 +181,7 @@ def low_pass_filter(data, cutoff, fs, order=5):
 
 
 def run_detection(root_path, file_name, experiment, trial, overlap=3,
-                  winlen=10, freq_min=15, freq_max=115, wsize=2500, th_perc=95, processing='none', overlapsize=.25):
+                  winlen=10, freq_min=15, freq_max=115, wsize=2500, th_perc=85, processing='none', overlapsize=.25):
     """
     Process audio file to detect ultrasonic vocalizations (USVs).
 
@@ -266,13 +268,44 @@ def run_detection(root_path, file_name, experiment, trial, overlap=3,
         noise_floor = np.percentile(Sxx, th_perc)
         Sxx[Sxx < noise_floor] = noise_floor
 
-        if (processing != "Otsu"):
-            Sxx = use_NMF_Small(Sxx)
+        # Current thought: Split the spectrogram into upper and lower frequency bands
+        # Lower band: use current process... might need to make AT a bit less aggressive?
+        # Upper band: need to make a less aggressive process... CLAHE maybe?
 
-        if(processing == "Otsu"):
-            cleaned_image = clean_spec_orig(Sxx)
+
+        # Find index where frequency >= 40 kHz (f is in kHz)
+
+        split = 40
+
+        split_idx = np.argmax(f >= split)
+
+        # Store original upper half from *raw* Sxx for later restoration
+        Sxx_high_original = Sxx[split_idx:, :]
+
+        # Process entire Sxx
+        if processing != "Otsu":
+            Sxx_processed = use_NMF_Small(Sxx)
         else:
-            cleaned_image = clean_spec_imp(Sxx)
+            Sxx_processed = Sxx  # no NMF for Otsu
+
+        # Clean entire spectrogram
+        if processing == "Otsu":
+            cleaned_image = clean_spec_orig(Sxx_processed)
+        else:
+            cleaned_image = clean_spec_imp(Sxx_processed)
+
+        # Apply mild median filter to reduce noise while keeping signals
+        Sxx_high_original = ndimage.median_filter(Sxx_high_original, size=3)
+        
+        # Normalize spectrogram  PERFORMS POORLY ON C57
+        Sxx_high_original = cv2.normalize(Sxx_high_original, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+    
+        min_cols = min(cleaned_image.shape[1], Sxx_high_original.shape[1])
+        cleaned_image = cleaned_image[:, :min_cols]
+        Sxx_high_norm = Sxx_high_original[:, :min_cols]
+
+        # Combine the lower band (processed) and upper band (original) into cleaned_image
+        cleaned_image[split_idx:, :] = Sxx_high_norm
 
         final_image, annotations = detect_contours(cleaned_image, start_time, end_time, freq_min, freq_max, file_name, annotations, processing=processing)
 
@@ -369,7 +402,7 @@ if __name__ == "__main__":
 
     # Run detection for each audio file
     for audio_file in tqdm(audio_files, desc=f"Running Detection on audio files for {experiment} {trial}"):
-        run_detection(root_path, audio_file, experiment, trial, **ac_kwargs)
+        run_detection(root_path,  audio_file, experiment, trial,**ac_kwargs)
     
     # Generate ground truth annotations
     generate_annotations(experiment, trial, root_path, file_ext)
