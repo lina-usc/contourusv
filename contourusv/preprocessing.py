@@ -3,13 +3,6 @@ import numpy as np
 from scipy import ndimage
 from sklearn.decomposition import NMF
 
-# Lists for PR:
-# 1. Combine preprocessing functions into a single function with a parameter to choose between them.
-# 2. Generate f1 score graph using sb, add to poster
-# 3. Fun tests on rat_pleasant using both methods
-# 4. Push PR to main repo
-# 5. Make sure ghpages is pushing correctly
-
 def clean_spec_imp(Sxx):
     """
     Improved preprocessing of spectrogram data for USV detection, using adaptive theshholding. 
@@ -40,14 +33,14 @@ def clean_spec_imp(Sxx):
         enhanced_img, 255, 
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
         cv2.THRESH_BINARY_INV, 
-        15, 15
+        15, 15 # blockSize, C
     )
 
     # best results so far, 15, 15
     # 15, 19 seems to do well
 
     # Morphological processing to connect weakly detected signals
-    # kernel = np.ones((1, 1), np.uint8)  # Moderate kernel size
+    # kernel = np.ones((1, 1), np.uint8)  # Moderate kernel size THIS DOESNT WORK WELL
 
     # final_img = cv2.morphologyEx(adaptive_img, cv2.MORPH_OPEN, kernel)
 
@@ -55,7 +48,7 @@ def clean_spec_imp(Sxx):
 
 
 
-
+# older version of Clean_spec_imp
 def clean_spec_orig(Sxx):
     """
     Preprocess spectrogram data for USV detection using Otsu's threshholding and CLAHE contrast enhancement.
