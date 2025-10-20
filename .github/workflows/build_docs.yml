@@ -1,5 +1,8 @@
 name: Build Sphinx Documentation
 
+permissions:
+  contents: write   # allow GITHUB_TOKEN to push repo contents
+
 on:
     push:
         branches:
@@ -16,6 +19,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
+      with:
+        persist-credentials: true   # allow `git push` to authenticate with GITHUB_TOKEN
 
     - name: Set up Python
       uses: actions/setup-python@v6
