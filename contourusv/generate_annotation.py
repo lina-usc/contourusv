@@ -77,7 +77,8 @@ def load_csv_usv(file_name):
         Processed annotations with columns:
         ['begin_time', 'end_time']
     """
-    data = pd.read_csv(file_name, header=None, names=['begin_time', 'end_time'], usecols=[0, 1])
+    data = pd.read_csv(file_name, header=None, skiprows=1, names=[
+                'begin_time', 'end_time'], sep='\t', usecols=[1, 2])
     data['begin_time'] = data['begin_time'].astype(float)
     data['end_time'] = data['end_time'].astype(float)
     return data
